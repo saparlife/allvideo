@@ -23,9 +23,16 @@ export interface Video {
   status: string;
 }
 
+interface ClaimJobResult {
+  job_id: string;
+  video_id: string;
+  original_key: string;
+  user_id: string;
+}
+
 export async function claimJob(): Promise<{ job: TranscodeJob; video: Video } | null> {
   const { data, error } = await supabase.rpc("claim_transcode_job", {
-    p_worker_id: config.worker.id,
+    worker_name: config.worker.id,
   });
 
   if (error) {
@@ -33,15 +40,19 @@ export async function claimJob(): Promise<{ job: TranscodeJob; video: Video } | 
     return null;
   }
 
-  if (!data) {
+  // RPC returns array for table-returning functions
+  const results = data as ClaimJobResult[] | null;
+  if (!results || results.length === 0) {
     return null;
   }
+
+  const claimed = results[0];
 
   // Get video details
   const { data: video, error: videoError } = await supabase
     .from("videos")
     .select("*")
-    .eq("id", data.video_id)
+    .eq("id", claimed.video_id)
     .single();
 
   if (videoError || !video) {
@@ -49,7 +60,19 @@ export async function claimJob(): Promise<{ job: TranscodeJob; video: Video } | 
     return null;
   }
 
-  return { job: data as TranscodeJob, video: video as Video };
+  // Build job object from claimed data
+  const job: TranscodeJob = {
+    id: claimed.job_id,
+    video_id: claimed.video_id,
+    status: "processing",
+    progress: 0,
+    error_message: null,
+    worker_id: config.worker.id,
+    started_at: new Date().toISOString(),
+    completed_at: null,
+  };
+
+  return { job, video: video as Video };
 }
 
 export async function updateJobProgress(jobId: string, progress: number): Promise<void> {
