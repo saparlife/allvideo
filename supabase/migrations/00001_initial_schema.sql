@@ -1,9 +1,9 @@
 -- AllVideo.one Database Schema
 -- Run this in Supabase SQL Editor
 
--- Enable extensions
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+-- Enable extensions (in extensions schema for Supabase)
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA extensions;
+CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA extensions;
 
 -- Enums
 CREATE TYPE user_role AS ENUM ('user', 'admin');
@@ -37,7 +37,7 @@ CREATE TABLE public.users (
 -- SUBSCRIPTIONS
 -- ============================================
 CREATE TABLE public.subscriptions (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
   -- Plan details
   tier subscription_tier DEFAULT 'free',
@@ -59,7 +59,7 @@ CREATE INDEX idx_subscriptions_active ON public.subscriptions(user_id, is_active
 -- VIDEOS
 -- ============================================
 CREATE TABLE public.videos (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
   -- Basic info
   title TEXT NOT NULL,
@@ -98,7 +98,7 @@ CREATE INDEX idx_videos_created ON public.videos(user_id, created_at DESC);
 -- TRANSCODE JOBS (Queue for VPS worker)
 -- ============================================
 CREATE TABLE public.transcode_jobs (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   video_id UUID REFERENCES public.videos(id) ON DELETE CASCADE NOT NULL,
   -- Job info
   status transcode_status DEFAULT 'pending',
@@ -127,7 +127,7 @@ CREATE INDEX idx_jobs_video ON public.transcode_jobs(video_id);
 -- API KEYS
 -- ============================================
 CREATE TABLE public.api_keys (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
   -- Key details
   name TEXT NOT NULL,
