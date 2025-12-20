@@ -9,7 +9,7 @@ export type Json =
 export type UserRole = "user" | "admin";
 export type VideoStatus = "uploading" | "processing" | "ready" | "failed" | "deleted";
 export type TranscodeStatus = "pending" | "processing" | "completed" | "failed";
-export type SubscriptionTier = "free" | "starter" | "pro" | "business";
+export type SubscriptionTier = "free" | "starter" | "pro" | "business" | "scale" | "enterprise" | "enterprise_plus" | "ultimate";
 
 export interface Database {
   public: {

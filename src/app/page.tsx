@@ -97,22 +97,51 @@ export default function Home() {
           <p className="text-gray-400 mb-8">
             Start free, upgrade when you need more
           </p>
+
+          {/* Main Tiers */}
           <div className="grid md:grid-cols-4 gap-4 max-w-5xl mx-auto">
             {[
-              { name: "Free", storage: "10 GB", price: "$0" },
-              { name: "Starter", storage: "100 GB", price: "$9/mo" },
-              { name: "Pro", storage: "500 GB", price: "$29/mo" },
-              { name: "Business", storage: "2 TB", price: "$79/mo" },
+              { name: "Free", storage: "10 GB", price: "$0", popular: false },
+              { name: "Starter", storage: "100 GB", price: "$9/mo", popular: false },
+              { name: "Pro", storage: "500 GB", price: "$39/mo", popular: true },
+              { name: "Business", storage: "2 TB", price: "$149/mo", popular: false },
             ].map((plan) => (
               <div
                 key={plan.name}
-                className="bg-gray-800/30 rounded-lg p-6 border border-gray-700"
+                className={`bg-gray-800/30 rounded-lg p-6 border ${plan.popular ? 'border-blue-500 ring-1 ring-blue-500' : 'border-gray-700'} relative`}
               >
+                {plan.popular && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                    Popular
+                  </span>
+                )}
                 <h3 className="text-lg font-semibold text-white">{plan.name}</h3>
                 <p className="text-2xl font-bold text-white mt-2">{plan.price}</p>
                 <p className="text-gray-400 text-sm mt-1">{plan.storage} storage</p>
               </div>
             ))}
+          </div>
+
+          {/* Enterprise Tiers */}
+          <div className="mt-8">
+            <p className="text-gray-500 text-sm mb-4">Enterprise plans for high-volume needs</p>
+            <div className="grid md:grid-cols-4 gap-4 max-w-5xl mx-auto">
+              {[
+                { name: "Scale", storage: "10 TB", price: "$749/mo" },
+                { name: "Enterprise", storage: "20 TB", price: "$1,499/mo" },
+                { name: "Enterprise+", storage: "50 TB", price: "$3,749/mo" },
+                { name: "Ultimate", storage: "100 TB", price: "$7,499/mo" },
+              ].map((plan) => (
+                <div
+                  key={plan.name}
+                  className="bg-gray-800/20 rounded-lg p-4 border border-gray-800"
+                >
+                  <h3 className="text-sm font-semibold text-gray-300">{plan.name}</h3>
+                  <p className="text-lg font-bold text-white mt-1">{plan.price}</p>
+                  <p className="text-gray-500 text-xs mt-1">{plan.storage} storage</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </main>
