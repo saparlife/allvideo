@@ -96,7 +96,7 @@ export default function RegisterPage() {
               className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
             />
           </div>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-gray-400 pb-2">
             By signing up, you agree to our Terms of Service and get 10GB of free storage.
           </p>
         </CardContent>

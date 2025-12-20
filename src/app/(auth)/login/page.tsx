@@ -46,7 +46,7 @@ export default function LoginPage() {
   return (
     <Card className="bg-gray-800/50 border-gray-700">
       <form onSubmit={handleSubmit}>
-        <CardContent className="pt-6 space-y-4">
+        <CardContent className="pt-6 pb-2 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-gray-200">
               Email
