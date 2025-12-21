@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import type { Video } from "@/types/database";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
+    const adminDb = await createAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const db = adminDb as any;
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -23,7 +25,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify video belongs to user
-    const { data: video, error: videoError } = await supabase
+    const { data: video, error: videoError } = await db
       .from("videos")
       .select("*")
       .eq("id", videoId)
@@ -38,12 +40,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Update video status to processing
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: updateError } = await (supabase as any)
+    const { error: updateError } = await db
       .from("videos")
       .update({
         status: "processing",
-        uploaded_at: new Date().toISOString(),
       })
       .eq("id", videoId);
 
@@ -56,8 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create transcode job
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: jobError } = await (supabase as any)
+    const { error: jobError } = await db
       .from("transcode_jobs")
       .insert({
         video_id: videoId,

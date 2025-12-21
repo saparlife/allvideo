@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { r2Client, R2_BUCKET } from "@/lib/r2/client";
@@ -7,8 +7,9 @@ import { r2Client, R2_BUCKET } from "@/lib/r2/client";
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
+    const adminDb = await createAdminClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db = supabase as any;
+    const db = adminDb as any;
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
