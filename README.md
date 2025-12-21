@@ -1,36 +1,199 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AllVideo.one
 
-## Getting Started
+Video hosting platform with automatic HLS transcoding. Upload videos, get multi-quality streaming with adaptive bitrate.
 
-First, run the development server:
+## Features
+
+- **Video Upload** - Direct upload to Cloudflare R2 with presigned URLs
+- **HLS Transcoding** - Automatic conversion to multiple quality levels (360p, 480p, 720p, 1080p)
+- **Adaptive Streaming** - HLS player with automatic quality switching
+- **Dashboard** - Manage videos, view stats, get embed codes
+- **API Keys** - Programmatic access for integrations
+- **Admin Panel** - User management, video moderation
+
+## Tech Stack
+
+### Frontend
+- **Next.js 16** - React framework with App Router
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Styling
+- **Radix UI** - Accessible components
+- **hls.js** - HLS video playback
+
+### Backend
+- **Supabase** - PostgreSQL database, Auth, Row Level Security
+- **Cloudflare R2** - Object storage for videos
+- **Next.js API Routes** - REST API endpoints
+
+### Worker (VPS)
+- **Node.js** - Transcoding worker
+- **FFmpeg** - Video transcoding to HLS
+- **Docker** - Container deployment
+
+## Architecture
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Next.js App   │────▶│    Supabase     │◀────│  Worker (VPS)   │
+│   (Vercel)      │     │   (Database)    │     │   (Docker)      │
+└────────┬────────┘     └─────────────────┘     └────────┬────────┘
+         │                                               │
+         │              ┌─────────────────┐              │
+         └─────────────▶│  Cloudflare R2  │◀─────────────┘
+                        │    (Storage)    │
+                        └─────────────────┘
+```
+
+1. User uploads video → presigned URL → R2
+2. Video record created in Supabase with `status: uploading`
+3. Transcode job added to queue
+4. Worker polls queue, claims job
+5. Worker downloads original, transcodes to HLS
+6. Worker uploads HLS segments to R2
+7. Worker updates video `status: ready`
+
+## Setup
+
+### Prerequisites
+
+- Node.js 18+
+- Supabase account
+- Cloudflare R2 bucket
+- VPS with Docker (for worker)
+
+### 1. Clone & Install
+
+```bash
+git clone https://github.com/saparlife/allvideo.git
+cd allvideo
+npm install
+```
+
+### 2. Environment Variables
+
+Create `.env.local`:
+
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+
+# Cloudflare R2
+R2_ACCOUNT_ID=xxx
+R2_ACCESS_KEY_ID=xxx
+R2_SECRET_ACCESS_KEY=xxx
+R2_BUCKET=allvideo-storage
+R2_PUBLIC_URL=https://pub-xxx.r2.dev
+```
+
+### 3. Database Setup
+
+Run migration in Supabase SQL Editor:
+
+```bash
+# File: supabase/migrations/00001_initial_schema.sql
+```
+
+### 4. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Worker Setup (VPS)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Install Docker
 
-## Learn More
+```bash
+curl -fsSL https://get.docker.com | sh
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Deploy Worker
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+cd worker
+cp .env.example .env
+# Edit .env with your credentials
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+docker compose up -d
+```
 
-## Deploy on Vercel
+### 3. Check Logs
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+docker logs worker-worker-1 -f
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## API Endpoints
+
+### Public API (requires API key)
+
+```
+GET  /api/public/videos          - List videos
+GET  /api/public/videos/:id      - Get video details
+POST /api/public/videos          - Init upload
+POST /api/public/videos/:id/complete - Complete upload
+```
+
+### Internal API
+
+```
+POST /api/videos/upload/init     - Get presigned upload URL
+POST /api/videos/upload/complete - Mark upload complete
+```
+
+## Database Schema
+
+| Table | Description |
+|-------|-------------|
+| `users` | User profiles (extends auth.users) |
+| `subscriptions` | User subscription plans |
+| `videos` | Video metadata and status |
+| `transcode_jobs` | Transcoding queue |
+| `api_keys` | API key management |
+
+## HLS Output
+
+Videos are transcoded to multiple quality levels:
+
+| Quality | Resolution | Bitrate |
+|---------|------------|---------|
+| 360p | 640x360 | 800 kbps |
+| 480p | 854x480 | 1400 kbps |
+| 720p | 1280x720 | 2800 kbps |
+| 1080p | 1920x1080 | 5000 kbps |
+
+Output structure in R2:
+```
+users/{user_id}/hls/{video_id}/
+├── master.m3u8
+├── v0/playlist.m3u8
+├── v0/segment000.ts
+├── v1/playlist.m3u8
+└── ...
+```
+
+## Deployment
+
+### Frontend (Vercel)
+
+```bash
+vercel
+```
+
+### Worker (VPS)
+
+```bash
+ssh root@your-vps
+cd /root/allvideo/worker
+git pull
+docker compose down
+docker compose up -d --build
+```
+
+## License
+
+MIT
