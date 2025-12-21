@@ -149,7 +149,8 @@ export async function transcodeToHLS(
     );
   });
 
-  ffmpegArgs.unshift("-filter_complex", filterComplex.slice(0, -1));
+  // Insert filter_complex after -i input (at index 2)
+  ffmpegArgs.splice(2, 0, "-filter_complex", filterComplex.slice(0, -1));
 
   ffmpegArgs.push(
     "-var_stream_map", varStreamMap.join(" "),
