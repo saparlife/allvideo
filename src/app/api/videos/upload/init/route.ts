@@ -6,12 +6,15 @@ import { r2Client, R2_BUCKET } from "@/lib/r2/client";
 
 export async function POST(request: NextRequest) {
   try {
+    console.log("Upload init: Starting...");
+
     const supabase = await createClient();
     const adminDb = await createAdminClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const db = adminDb as any;
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
+    console.log("Upload init: Auth check", { userId: user?.id, authError });
 
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -19,6 +22,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { filename, size, contentType, title } = body;
+    console.log("Upload init: Request body", { filename, size, title });
 
     if (!filename || !size || !title) {
       return NextResponse.json(
@@ -59,9 +63,9 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (videoError || !video) {
-      console.error("Error creating video:", videoError);
+      console.error("Error creating video:", JSON.stringify(videoError));
       return NextResponse.json(
-        { error: "Failed to create video record" },
+        { error: "Failed to create video record", details: videoError?.message },
         { status: 500 }
       );
     }
@@ -69,6 +73,7 @@ export async function POST(request: NextRequest) {
     // Generate R2 key
     const extension = filename.split(".").pop() || "mp4";
     const originalKey = `users/${user.id}/originals/${video.id}/original.${extension}`;
+    console.log("Upload init: Generated key", originalKey);
 
     // Update video with original_key
     await db
@@ -77,6 +82,7 @@ export async function POST(request: NextRequest) {
       .eq("id", video.id);
 
     // Generate presigned URL for direct upload to R2
+    console.log("Upload init: Generating presigned URL", { bucket: R2_BUCKET });
     const command = new PutObjectCommand({
       Bucket: R2_BUCKET,
       Key: originalKey,
@@ -84,6 +90,7 @@ export async function POST(request: NextRequest) {
     });
 
     const uploadUrl = await getSignedUrl(r2Client, command, { expiresIn: 3600 });
+    console.log("Upload init: Success");
 
     return NextResponse.json({
       videoId: video.id,
@@ -93,7 +100,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Upload init error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error", details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }
