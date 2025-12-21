@@ -135,7 +135,8 @@ export async function transcodeToHLS(
   const varStreamMap: string[] = [];
 
   applicableResolutions.forEach((res, index) => {
-    filterComplex += `[0:v]scale=w=${res.width}:h=${res.height}:force_original_aspect_ratio=decrease[v${index}];`;
+    // Scale with force_original_aspect_ratio, then ensure dimensions are divisible by 2
+    filterComplex += `[0:v]scale=w=${res.width}:h=${res.height}:force_original_aspect_ratio=decrease,scale=trunc(iw/2)*2:trunc(ih/2)*2[v${index}];`;
     varStreamMap.push(`v:${index},a:${index}`);
 
     ffmpegArgs.push(

@@ -89,17 +89,33 @@ export default function UploadPage() {
 
       const { videoId, uploadUrl } = await initResponse.json();
 
-      // Step 2: Upload file directly to R2 (or via API for chunked)
-      // For simplicity, using direct upload for smaller files
-      const uploadResponse = await fetch(uploadUrl, {
-        method: "PUT",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
+      // Step 2: Upload file directly to R2 with progress tracking
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
 
-      if (!uploadResponse.ok) {
-        throw new Error("Failed to upload file");
-      }
+        xhr.upload.addEventListener("progress", (event) => {
+          if (event.lengthComputable) {
+            const progress = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(progress);
+          }
+        });
+
+        xhr.addEventListener("load", () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve();
+          } else {
+            reject(new Error("Failed to upload file"));
+          }
+        });
+
+        xhr.addEventListener("error", () => {
+          reject(new Error("Network error during upload"));
+        });
+
+        xhr.open("PUT", uploadUrl);
+        xhr.setRequestHeader("Content-Type", file.type);
+        xhr.send(file);
+      });
 
       setUploadProgress(100);
       setStatus("processing");
