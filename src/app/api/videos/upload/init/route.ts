@@ -33,6 +33,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Clean up old stuck uploads (older than 1 hour)
+    await db
+      .from("videos")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("status", "uploading")
+      .lt("created_at", new Date(Date.now() - 60 * 60 * 1000).toISOString());
+
     // Check storage limit
     const { data: profile } = await db
       .from("users")
