@@ -3,7 +3,7 @@ import DodoPayments from "dodopayments";
 
 const client = new DodoPayments({
   bearerToken: process.env.DODO_PAYMENTS_API_KEY!,
-  environment: (process.env.DODO_PAYMENTS_ENVIRONMENT as "test_mode" | "live_mode") || "test_mode",
+  environment: (process.env.DODO_PAYMENTS_ENVIRONMENT as "test_mode" | "live_mode") || "live_mode",
 });
 
 export async function POST(request: NextRequest) {
@@ -18,8 +18,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create checkout session
-    const checkout = await client.payments.create({
+    const productId = body.product_cart[0]?.product_id;
+
+    // For subscription products, use subscriptions.create
+    const subscription = await client.subscriptions.create({
+      product_id: productId,
+      quantity: 1,
+      customer: {
+        email: body.customer?.email || "",
+        name: body.customer?.name || "Customer",
+      },
       billing: {
         city: body.billing?.city || "Unknown",
         country: body.billing?.country || "US",
@@ -27,21 +35,14 @@ export async function POST(request: NextRequest) {
         street: body.billing?.street || "Unknown",
         zipcode: body.billing?.zipcode || "00000",
       },
-      customer: {
-        email: body.customer?.email || "",
-        name: body.customer?.name || "Customer",
-      },
-      product_cart: body.product_cart.map((item: { product_id: string; quantity: number }) => ({
-        product_id: item.product_id,
-        quantity: item.quantity || 1,
-      })),
       return_url: process.env.NEXT_PUBLIC_APP_URL + "/dashboard?subscription=success",
+      payment_link: true,
       metadata: body.metadata || {},
     });
 
     return NextResponse.json({
-      checkout_url: checkout.payment_link,
-      payment_id: checkout.payment_id,
+      checkout_url: subscription.payment_link,
+      subscription_id: subscription.subscription_id,
     });
   } catch (error) {
     console.error("Checkout error:", error);
@@ -69,7 +70,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const checkout = await client.payments.create({
+    const subscription = await client.subscriptions.create({
+      product_id: productId,
+      quantity: 1,
+      customer: {
+        email: email || "",
+        name: "Customer",
+      },
       billing: {
         city: "Unknown",
         country: "US",
@@ -77,17 +84,13 @@ export async function GET(request: NextRequest) {
         street: "Unknown",
         zipcode: "00000",
       },
-      customer: {
-        email: email || "",
-        name: "Customer",
-      },
-      product_cart: [{ product_id: productId, quantity: 1 }],
       return_url: process.env.NEXT_PUBLIC_APP_URL + "/dashboard?subscription=success",
+      payment_link: true,
     });
 
     return NextResponse.json({
-      checkout_url: checkout.payment_link,
-      payment_id: checkout.payment_id,
+      checkout_url: subscription.payment_link,
+      subscription_id: subscription.subscription_id,
     });
   } catch (error) {
     console.error("Checkout error:", error);
