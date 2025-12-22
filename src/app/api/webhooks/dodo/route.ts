@@ -237,44 +237,25 @@ async function handleSubscriptionCancelled(data: {
     return;
   }
 
-  // Revert to free tier limits
-  const { error: userError } = await supabaseAdmin
-    .from("users")
-    .update({
-      storage_limit_bytes: 10 * 1024 * 1024 * 1024, // 10GB free
-      bandwidth_limit_bytes: 100 * 1024 * 1024 * 1024, // 100GB free
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", userId);
+  // Set grace period: 30 days from now
+  const gracePeriodEnd = new Date();
+  gracePeriodEnd.setDate(gracePeriodEnd.getDate() + 30);
 
-  if (userError) {
-    console.error("Error reverting user storage:", userError);
-  }
-
-  // Deactivate subscription
+  // Mark subscription as cancelled with grace period
+  // Don't revert limits yet - they keep access for 30 days
   const { error: subError } = await supabaseAdmin
     .from("subscriptions")
     .update({
       is_active: false,
-      expires_at: new Date().toISOString(),
+      expires_at: gracePeriodEnd.toISOString(), // Grace period end date
       updated_at: new Date().toISOString(),
     })
     .eq("user_id", userId)
     .eq("is_active", true);
 
   if (subError) {
-    console.error("Error deactivating subscription:", subError);
+    console.error("Error updating subscription:", subError);
   }
 
-  // Create free subscription
-  await supabaseAdmin.from("subscriptions").insert({
-    user_id: userId,
-    tier: "free",
-    storage_limit_gb: 10,
-    bandwidth_limit_gb: 100,
-    is_active: true,
-    starts_at: new Date().toISOString(),
-  });
-
-  console.log(`Subscription cancelled for user ${userId}, reverted to free`);
+  console.log(`Subscription cancelled for user ${userId}, grace period until ${gracePeriodEnd.toISOString()}`);
 }
