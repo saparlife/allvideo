@@ -47,19 +47,15 @@ async function processJob(): Promise<boolean> {
     );
     console.log("\n");
 
-    // Upload HLS files to R2
+    // Upload HLS files to R2 (includes poster.jpg)
     console.log("⬆️  Uploading HLS files to R2...");
     const hlsPrefix = `users/${video.user_id}/hls/${video.id}`;
     await uploadDirectory(outputDir, hlsPrefix);
     await updateJobProgress(job.id, 95);
 
-    // Upload thumbnail
-    console.log("⬆️  Uploading thumbnail...");
-    const thumbnailKey = `users/${video.user_id}/thumbnails/${video.id}/poster.jpg`;
-    await uploadFile(thumbnailPath, thumbnailKey, "image/jpeg");
-
-    // Complete the job
+    // Complete the job - thumbnail is in the hls folder (uploaded by uploadDirectory)
     const hlsKey = `${hlsPrefix}/master.m3u8`;
+    const thumbnailKey = `${hlsPrefix}/poster.jpg`;
     await completeJob(job.id, video.id, hlsKey, thumbnailKey, Math.round(duration));
 
     console.log(`✅ Completed: ${video.title}`);

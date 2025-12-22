@@ -86,13 +86,11 @@ export async function completeJob(
   jobId: string,
   videoId: string,
   hlsKey: string,
-  thumbnailUrl: string,
+  thumbnailKey: string,
   duration: number
 ): Promise<void> {
-  const publicHlsUrl = `${config.r2.publicUrl}/${hlsKey}`;
-  const publicThumbnailUrl = `${config.r2.publicUrl}/${thumbnailUrl}`;
-
-  await supabase
+  // Update job status
+  const { error: jobError } = await supabase
     .from("transcode_jobs")
     .update({
       status: "completed",
@@ -101,16 +99,24 @@ export async function completeJob(
     })
     .eq("id", jobId);
 
-  await supabase
+  if (jobError) {
+    console.error("Error updating job:", jobError);
+  }
+
+  // Update video status
+  const { error: videoError } = await supabase
     .from("videos")
     .update({
       status: "ready",
       hls_key: hlsKey,
-      hls_url: publicHlsUrl,
-      thumbnail_url: publicThumbnailUrl,
+      thumbnail_key: thumbnailKey,
       duration_seconds: duration,
     })
     .eq("id", videoId);
+
+  if (videoError) {
+    console.error("Error updating video:", videoError);
+  }
 }
 
 export async function failJob(jobId: string, videoId: string, errorMessage: string): Promise<void> {

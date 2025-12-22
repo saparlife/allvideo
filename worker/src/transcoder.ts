@@ -22,6 +22,7 @@ export async function getVideoDuration(inputPath: string): Promise<number> {
     ffprobe.stdout.on("data", (data) => {
       output += data.toString();
     });
+    ffprobe.stderr.on("data", () => {}); // Consume stderr to prevent blocking
 
     ffprobe.on("close", (code) => {
       if (code === 0) {
@@ -49,6 +50,7 @@ export async function getVideoResolution(inputPath: string): Promise<{ width: nu
     ffprobe.stdout.on("data", (data) => {
       output += data.toString();
     });
+    ffprobe.stderr.on("data", () => {}); // Consume stderr to prevent blocking
 
     ffprobe.on("close", (code) => {
       if (code === 0) {
@@ -78,6 +80,10 @@ export async function generateThumbnail(inputPath: string, outputPath: string): 
       "-y",
       outputPath,
     ]);
+
+    // IMPORTANT: Must consume stdout/stderr to prevent buffer blocking
+    ffmpeg.stdout.on("data", () => {});
+    ffmpeg.stderr.on("data", () => {});
 
     ffmpeg.on("close", (code) => {
       if (code === 0) {
@@ -169,6 +175,9 @@ export async function transcodeToHLS(
 
   return new Promise((resolve, reject) => {
     const ffmpeg = spawn("ffmpeg", ffmpegArgs);
+
+    // IMPORTANT: Must consume stdout to prevent buffer blocking
+    ffmpeg.stdout.on("data", () => {});
 
     let stderr = "";
     ffmpeg.stderr.on("data", (data) => {
