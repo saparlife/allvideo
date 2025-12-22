@@ -77,24 +77,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update user storage used
-    await db.rpc("increment_storage", {
-      user_id_param: user.id,
-      bytes_param: video.original_size_bytes,
-    });
+    // Update user storage used (simple update, no RPC)
+    const { data: currentUser } = await db
+      .from("users")
+      .select("storage_used_bytes")
+      .eq("id", user.id)
+      .single();
+
+    if (currentUser) {
+      await db
+        .from("users")
+        .update({
+          storage_used_bytes: (currentUser.storage_used_bytes || 0) + video.original_size_bytes,
+        })
+        .eq("id", user.id);
+    }
 
     // Create transcode job
-    const { error: jobError } = await db
+    console.log("Creating transcode job for video:", videoId);
+    const { data: jobData, error: jobError } = await db
       .from("transcode_jobs")
       .insert({
         video_id: videoId,
         status: "pending",
         priority: 0,
-      });
+      })
+      .select()
+      .single();
 
     if (jobError) {
       console.error("Error creating transcode job:", jobError);
-      // Don't fail the request, video is uploaded
+      // Try to create without returning data
+      await db.from("transcode_jobs").insert({
+        video_id: videoId,
+        status: "pending",
+        priority: 0,
+      });
+    } else {
+      console.log("Transcode job created:", jobData?.id);
     }
 
     return NextResponse.json({
