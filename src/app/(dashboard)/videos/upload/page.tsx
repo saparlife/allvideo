@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,18 @@ import { toast } from "sonner";
 
 type UploadStatus = "idle" | "uploading" | "processing" | "complete" | "error";
 
+const CONCURRENT_UPLOADS = 4; // Number of parallel chunk uploads
+
+interface PartInfo {
+  partNumber: number;
+  uploadUrl: string;
+}
+
+interface UploadedPart {
+  partNumber: number;
+  etag: string;
+}
+
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
@@ -19,7 +31,9 @@ export default function UploadPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [status, setStatus] = useState<UploadStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [uploadSpeed, setUploadSpeed] = useState<string>("");
   const router = useRouter();
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -59,6 +73,30 @@ export default function UploadPage() {
     }
   };
 
+  const uploadPart = async (
+    file: File,
+    part: PartInfo,
+    chunkSize: number,
+    signal: AbortSignal
+  ): Promise<UploadedPart> => {
+    const start = (part.partNumber - 1) * chunkSize;
+    const end = Math.min(start + chunkSize, file.size);
+    const chunk = file.slice(start, end);
+
+    const response = await fetch(part.uploadUrl, {
+      method: "PUT",
+      body: chunk,
+      signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to upload part ${part.partNumber}`);
+    }
+
+    const etag = response.headers.get("ETag") || "";
+    return { partNumber: part.partNumber, etag };
+  };
+
   const handleUpload = async () => {
     if (!file || !title) {
       toast.error("Please select a file and enter a title");
@@ -68,9 +106,14 @@ export default function UploadPage() {
     setStatus("uploading");
     setUploadProgress(0);
     setErrorMessage("");
+    setUploadSpeed("");
+
+    abortControllerRef.current = new AbortController();
+    const startTime = Date.now();
+    let totalUploaded = 0;
 
     try {
-      // Step 1: Initialize upload
+      // Step 1: Initialize multipart upload
       const initResponse = await fetch("/api/videos/upload/init", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -87,44 +130,74 @@ export default function UploadPage() {
         throw new Error(error.error || "Failed to initialize upload");
       }
 
-      const { videoId, uploadUrl } = await initResponse.json();
+      const { videoId, uploadId, parts, chunkSize } = await initResponse.json();
 
-      // Step 2: Upload file directly to R2 with progress tracking
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
+      // Step 2: Upload parts in parallel with concurrency limit
+      const uploadedParts: UploadedPart[] = [];
+      const partsQueue = [...parts] as PartInfo[];
+      const inProgress = new Set<number>();
 
-        xhr.upload.addEventListener("progress", (event) => {
-          if (event.lengthComputable) {
-            const progress = Math.round((event.loaded / event.total) * 100);
-            setUploadProgress(progress);
+      const updateProgress = () => {
+        const progress = Math.round((uploadedParts.length / parts.length) * 100);
+        setUploadProgress(progress);
+
+        // Calculate speed
+        const elapsed = (Date.now() - startTime) / 1000;
+        if (elapsed > 0) {
+          const bytesPerSecond = totalUploaded / elapsed;
+          const mbps = (bytesPerSecond * 8) / (1024 * 1024);
+          setUploadSpeed(`${mbps.toFixed(1)} Mbps`);
+        }
+      };
+
+      const processQueue = async () => {
+        while (partsQueue.length > 0 || inProgress.size > 0) {
+          // Start new uploads up to concurrency limit
+          while (partsQueue.length > 0 && inProgress.size < CONCURRENT_UPLOADS) {
+            const part = partsQueue.shift()!;
+            inProgress.add(part.partNumber);
+
+            uploadPart(file, part, chunkSize, abortControllerRef.current!.signal)
+              .then((uploadedPart) => {
+                uploadedParts.push(uploadedPart);
+                totalUploaded += Math.min(chunkSize, file.size - (part.partNumber - 1) * chunkSize);
+                inProgress.delete(part.partNumber);
+                updateProgress();
+              })
+              .catch((err) => {
+                if (err.name !== "AbortError") {
+                  throw err;
+                }
+              });
           }
-        });
 
-        xhr.addEventListener("load", () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve();
-          } else {
-            reject(new Error("Failed to upload file"));
+          // Wait a bit before checking again
+          await new Promise((resolve) => setTimeout(resolve, 100));
+
+          // Check if all done
+          if (partsQueue.length === 0 && inProgress.size === 0) {
+            break;
           }
-        });
+        }
+      };
 
-        xhr.addEventListener("error", () => {
-          reject(new Error("Network error during upload"));
-        });
+      await processQueue();
 
-        xhr.open("PUT", uploadUrl);
-        xhr.setRequestHeader("Content-Type", file.type);
-        xhr.send(file);
-      });
+      // Sort parts by part number
+      uploadedParts.sort((a, b) => a.partNumber - b.partNumber);
 
       setUploadProgress(100);
       setStatus("processing");
 
-      // Step 3: Complete upload and trigger transcoding
+      // Step 3: Complete multipart upload
       const completeResponse = await fetch("/api/videos/upload/complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ videoId }),
+        body: JSON.stringify({
+          videoId,
+          uploadId,
+          parts: uploadedParts,
+        }),
       });
 
       if (!completeResponse.ok) {
@@ -138,10 +211,24 @@ export default function UploadPage() {
         router.push("/videos");
       }, 2000);
     } catch (error) {
+      if ((error as Error).name === "AbortError") {
+        setStatus("idle");
+        setUploadProgress(0);
+        return;
+      }
       setStatus("error");
       setErrorMessage(error instanceof Error ? error.message : "Upload failed");
       toast.error("Upload failed. Please try again.");
     }
+  };
+
+  const handleCancel = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    setStatus("idle");
+    setUploadProgress(0);
+    setUploadSpeed("");
   };
 
   const formatFileSize = (bytes: number) => {
@@ -199,7 +286,7 @@ export default function UploadPage() {
                 </label>
               </Button>
               <p className="text-xs text-gray-500 mt-4">
-                Supported formats: MP4, MOV, AVI, MKV, WMV (max 2GB)
+                Supported formats: MP4, MOV, AVI, MKV, WMV (max 10GB)
               </p>
             </div>
           ) : (
@@ -231,9 +318,24 @@ export default function UploadPage() {
                     <span className="text-gray-400">
                       {status === "uploading" ? "Uploading..." : "Processing..."}
                     </span>
-                    <span className="text-white">{uploadProgress}%</span>
+                    <div className="flex items-center gap-3">
+                      {uploadSpeed && status === "uploading" && (
+                        <span className="text-green-400">{uploadSpeed}</span>
+                      )}
+                      <span className="text-white">{uploadProgress}%</span>
+                    </div>
                   </div>
                   <Progress value={uploadProgress} className="h-2" />
+                  {status === "uploading" && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCancel}
+                      className="text-red-400 hover:text-red-300 mt-2"
+                    >
+                      Cancel Upload
+                    </Button>
+                  )}
                 </div>
               )}
 

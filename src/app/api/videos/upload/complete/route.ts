@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { CompleteMultipartUploadCommand } from "@aws-sdk/client-s3";
+import { r2Client, R2_BUCKET } from "@/lib/r2/client";
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { videoId } = body;
+    const { videoId, uploadId, parts } = body;
 
     if (!videoId) {
       return NextResponse.json(
@@ -39,6 +41,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Complete multipart upload if uploadId and parts are provided
+    if (uploadId && parts && Array.isArray(parts)) {
+      console.log("Completing multipart upload", { uploadId, partsCount: parts.length });
+
+      const completeCommand = new CompleteMultipartUploadCommand({
+        Bucket: R2_BUCKET,
+        Key: video.original_key,
+        UploadId: uploadId,
+        MultipartUpload: {
+          Parts: parts.map((part: { partNumber: number; etag: string }) => ({
+            PartNumber: part.partNumber,
+            ETag: part.etag,
+          })),
+        },
+      });
+
+      await r2Client.send(completeCommand);
+      console.log("Multipart upload completed successfully");
+    }
+
     // Update video status to processing
     const { error: updateError } = await db
       .from("videos")
@@ -54,6 +76,12 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Update user storage used
+    await db.rpc("increment_storage", {
+      user_id_param: user.id,
+      bytes_param: video.original_size_bytes,
+    });
 
     // Create transcode job
     const { error: jobError } = await db
@@ -77,7 +105,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Upload complete error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error", details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }

@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { CreateMultipartUploadCommand, UploadPartCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { r2Client, R2_BUCKET } from "@/lib/r2/client";
+
+const CHUNK_SIZE = 10 * 1024 * 1024; // 10MB chunks
 
 export async function POST(request: NextRequest) {
   try {
@@ -81,21 +83,46 @@ export async function POST(request: NextRequest) {
       .update({ original_key: originalKey })
       .eq("id", video.id);
 
-    // Generate presigned URL for direct upload to R2
-    console.log("Upload init: Generating presigned URL", { bucket: R2_BUCKET });
-    const command = new PutObjectCommand({
+    // Calculate number of parts
+    const numParts = Math.ceil(size / CHUNK_SIZE);
+    console.log("Upload init: Multipart upload", { numParts, chunkSize: CHUNK_SIZE });
+
+    // Create multipart upload
+    const createCommand = new CreateMultipartUploadCommand({
       Bucket: R2_BUCKET,
       Key: originalKey,
       ContentType: contentType,
     });
 
-    const uploadUrl = await getSignedUrl(r2Client, command, { expiresIn: 3600 });
-    console.log("Upload init: Success");
+    const { UploadId } = await r2Client.send(createCommand);
+
+    if (!UploadId) {
+      throw new Error("Failed to create multipart upload");
+    }
+
+    // Generate presigned URLs for each part
+    const parts: { partNumber: number; uploadUrl: string }[] = [];
+
+    for (let i = 1; i <= numParts; i++) {
+      const uploadPartCommand = new UploadPartCommand({
+        Bucket: R2_BUCKET,
+        Key: originalKey,
+        UploadId,
+        PartNumber: i,
+      });
+
+      const uploadUrl = await getSignedUrl(r2Client, uploadPartCommand, { expiresIn: 3600 });
+      parts.push({ partNumber: i, uploadUrl });
+    }
+
+    console.log("Upload init: Success, multipart upload created");
 
     return NextResponse.json({
       videoId: video.id,
-      uploadUrl,
+      uploadId: UploadId,
       key: originalKey,
+      parts,
+      chunkSize: CHUNK_SIZE,
     });
   } catch (error) {
     console.error("Upload init error:", error);
