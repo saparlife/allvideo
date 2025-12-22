@@ -6,6 +6,20 @@ import { Check, Infinity, Zap, ArrowRight } from "lucide-react";
 
 const plans = [
   {
+    name: "Free",
+    price: "$0",
+    storage: "10 GB",
+    features: [
+      "10 GB storage",
+      "Unlimited bandwidth",
+      "1080p transcoding",
+      "HLS adaptive streaming",
+      "Global CDN",
+    ],
+    popular: false,
+    isFree: true,
+  },
+  {
     name: "Starter",
     price: "$29",
     storage: "50 GB",
@@ -74,6 +88,10 @@ const plans = [
 
 const faqs = [
   {
+    q: "What's included in the free plan?",
+    a: "The free plan includes 10GB storage, unlimited bandwidth, 1080p transcoding, and global CDN delivery. No credit card required. Perfect for trying the service or small projects."
+  },
+  {
     q: "Is bandwidth really unlimited?",
     a: "Yes. We use Cloudflare R2 with free egress. Whether your videos get 1,000 or 1,000,000 views, you pay the same monthly price. No overage charges, ever."
   },
@@ -121,7 +139,7 @@ export default function PricingPage() {
               Sign in
             </Link>
             <Button asChild size="sm" className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 font-medium">
-              <Link href="/pricing">Get Started</Link>
+              <Link href="/register">Start Free</Link>
             </Button>
           </div>
         </nav>
@@ -168,7 +186,7 @@ export default function PricingPage() {
         </div>
 
         {/* Plans */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto mb-24">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-5 max-w-7xl mx-auto mb-24">
           {plans.map((plan) => (
             <div key={plan.name} className={`group relative ${plan.popular ? 'lg:scale-105 lg:z-10' : ''}`}>
               {plan.popular && (
@@ -209,8 +227,14 @@ export default function PricingPage() {
                   className={`w-full ${plan.popular ? 'bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700' : 'bg-white/10 hover:bg-white/20'} font-medium`}
                   asChild
                 >
-                  <Link href={plan.name === "Enterprise" ? "mailto:hello@unlimvideo.com" : `/checkout?plan=${plan.name.toLowerCase()}`}>
-                    {plan.name === "Enterprise" ? "Contact Sales" : "Subscribe"}
+                  <Link href={
+                    plan.name === "Enterprise"
+                      ? "mailto:hello@unlimvideo.com"
+                      : plan.name === "Free"
+                        ? "/register"
+                        : `/checkout?plan=${plan.name.toLowerCase()}`
+                  }>
+                    {plan.name === "Enterprise" ? "Contact Sales" : plan.name === "Free" ? "Get Started" : "Subscribe"}
                   </Link>
                 </Button>
               </div>

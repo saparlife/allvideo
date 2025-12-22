@@ -209,12 +209,20 @@ export default function Home() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 font-medium h-12 px-8 text-base">
-                <Link href="/pricing">
-                  View Plans
+                <Link href="/register">
+                  Start Free
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </Button>
+              <Button asChild size="lg" variant="outline" className="border-white/20 bg-white/5 hover:bg-white/10 font-medium h-12 px-8 text-base">
+                <Link href="/pricing">
+                  View Plans
+                </Link>
+              </Button>
             </div>
+            <p className="text-sm text-gray-500 mt-4">
+              10GB free storage included. No credit card required.
+            </p>
           </div>
         </section>
 

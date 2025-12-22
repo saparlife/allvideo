@@ -103,7 +103,64 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000)
 
-## Worker Setup (VPS)
+## Infrastructure (Production)
+
+Worker работает на выделенном сервере Hetzner:
+
+| Параметр | Значение |
+|----------|----------|
+| **IP** | 65.21.195.154 |
+| **SSH** | `ssh root@65.21.195.154` |
+| **OS** | Ubuntu 24.04 LTS |
+| **Worker ID** | hetzner-worker-1 |
+| **Путь** | /data/docker/worker/ |
+
+### Как работает Worker
+
+```
+1. Worker polling Supabase каждые 10 сек
+2. Находит задачу со статусом "pending"
+3. Ставит статус "processing", указывает worker_id
+4. Скачивает видео, транскодирует FFmpeg → HLS
+5. Загружает в Cloudflare R2
+6. Ставит статус "completed"
+```
+
+Worker автономный — имеет `SUPABASE_SERVICE_ROLE_KEY` и `R2` ключи в `.env`.
+
+### Управление Worker
+
+```bash
+# Статус
+ssh root@65.21.195.154 "docker ps | grep worker"
+
+# Логи
+ssh root@65.21.195.154 "docker logs -f worker-worker-1"
+
+# Перезапуск
+ssh root@65.21.195.154 "cd /data/docker/worker && docker compose restart"
+
+# Пересборка (после изменений кода)
+ssh root@65.21.195.154 "cd /data/docker/worker && docker compose up -d --build"
+```
+
+### Обновление Worker
+
+```bash
+# Скопировать новый код
+scp -r worker/* root@65.21.195.154:/data/docker/worker/
+
+# Пересобрать и запустить
+ssh root@65.21.195.154 "cd /data/docker/worker && docker compose up -d --build"
+```
+
+### Документация сервера
+
+Полная документация: `/Users/sapar/Documents/server/`
+
+---
+
+## Worker Setup (Local/Dev)
 
 ### 1. Install Docker
 
