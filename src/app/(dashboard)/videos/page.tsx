@@ -1,8 +1,11 @@
-import { createClient } from "@/lib/supabase/server";
+"use client";
+
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Video, Clock, Eye, MoreVertical } from "lucide-react";
+import { Plus, Video, Clock, Eye, MoreVertical, Loader2 } from "lucide-react";
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -42,17 +45,38 @@ function getStatusBadge(status: string) {
   }
 }
 
-export default async function VideosPage() {
-  const supabase = await createClient();
+export default function VideosPage() {
+  const [videos, setVideos] = useState<VideoType[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const supabase = createClient();
 
-  const { data: videos } = await supabase
-    .from("videos")
-    .select("*")
-    .eq("user_id", user!.id)
-    .neq("status", "deleted")
-    .order("created_at", { ascending: false }) as { data: VideoType[] | null };
+  useEffect(() => {
+    async function loadVideos() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("videos")
+        .select("*")
+        .eq("user_id", user.id)
+        .neq("status", "deleted")
+        .order("created_at", { ascending: false });
+
+      setVideos((data as VideoType[]) || []);
+      setLoading(false);
+    }
+
+    loadVideos();
+  }, [supabase]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -60,9 +84,7 @@ export default async function VideosPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Videos</h1>
-          <p className="text-gray-400">
-            Manage your video library
-          </p>
+          <p className="text-gray-400">Manage your video library</p>
         </div>
         <Button asChild>
           <Link href="/videos/upload">
@@ -73,7 +95,7 @@ export default async function VideosPage() {
       </div>
 
       {/* Videos Grid */}
-      {videos && videos.length > 0 ? (
+      {videos.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {videos.map((video) => (
             <Card key={video.id} className="bg-gray-900 border-gray-800 overflow-hidden">
@@ -82,7 +104,7 @@ export default async function VideosPage() {
                 {video.thumbnail_key ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={`${process.env.R2_PUBLIC_URL}/${video.thumbnail_key}`}
+                    src={`${process.env.NEXT_PUBLIC_R2_PUBLIC_URL || ""}/${video.thumbnail_key}`}
                     alt={video.title}
                     className="w-full h-full object-cover"
                   />

@@ -1,30 +1,39 @@
-import { ReactNode } from "react";
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+"use client";
+
+import { ReactNode, useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { Toaster } from "@/components/ui/sonner";
-import type { User } from "@/types/database";
+import type { User as DbUser } from "@/types/database";
+import type { User } from "@supabase/supabase-js";
 
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  const supabase = await createClient();
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<DbUser | null>(null);
+  const supabase = createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  // Get user profile
-  const { data: profile } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", user.id)
-    .single() as { data: User | null };
+  useEffect(() => {
+    // Get user immediately from session
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+      if (user) {
+        // Fetch profile in background
+        supabase
+          .from("users")
+          .select("*")
+          .eq("id", user.id)
+          .single()
+          .then(({ data }) => {
+            if (data) setProfile(data as DbUser);
+          });
+      }
+    });
+  }, [supabase]);
 
   const isAdmin = profile?.role === "admin";
 
@@ -34,7 +43,7 @@ export default async function DashboardLayout({
       <div className="flex-1 flex flex-col">
         <Header
           user={{
-            email: user.email!,
+            email: user?.email || "",
             name: profile?.name,
             avatar_url: profile?.avatar_url,
           }}

@@ -1,8 +1,11 @@
-import { createClient } from "@/lib/supabase/server";
+"use client";
+
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { HardDrive, Wifi, Video, Upload, Plus } from "lucide-react";
+import { HardDrive, Wifi, Video, Upload, Plus, Loader2 } from "lucide-react";
 import Link from "next/link";
 import type { User } from "@/types/database";
 
@@ -14,37 +17,53 @@ function formatBytes(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
-export default async function DashboardPage() {
-  const supabase = await createClient();
+export default function DashboardPage() {
+  const [profile, setProfile] = useState<User | null>(null);
+  const [stats, setStats] = useState({ total: 0, ready: 0, processing: 0 });
+  const [loading, setLoading] = useState(true);
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const supabase = createClient();
 
-  // Get user profile with usage stats
-  const { data: profile } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", user!.id)
-    .single() as { data: User | null };
+  useEffect(() => {
+    async function loadData() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-  // Get video counts
-  const { count: totalVideos } = await supabase
-    .from("videos")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", user!.id);
+      // Fetch profile
+      const { data: profileData } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", user.id)
+        .single();
 
-  const { count: readyVideos } = await supabase
-    .from("videos")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", user!.id)
-    .eq("status", "ready");
+      if (profileData) setProfile(profileData as User);
 
-  const { count: processingVideos } = await supabase
-    .from("videos")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", user!.id)
-    .eq("status", "processing");
+      // Fetch video counts in parallel
+      const [totalRes, readyRes, processingRes] = await Promise.all([
+        supabase.from("videos").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("videos").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("status", "ready"),
+        supabase.from("videos").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("status", "processing"),
+      ]);
 
-  // Calculate percentages
+      setStats({
+        total: totalRes.count || 0,
+        ready: readyRes.count || 0,
+        processing: processingRes.count || 0,
+      });
+      setLoading(false);
+    }
+
+    loadData();
+  }, [supabase]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
   const storagePercent = profile
     ? (profile.storage_used_bytes / profile.storage_limit_bytes) * 100
     : 0;
@@ -60,7 +79,7 @@ export default async function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-white">Dashboard</h1>
           <p className="text-gray-400">
-            Welcome back, {profile?.name || user?.email}
+            Welcome back, {profile?.name || profile?.email}
           </p>
         </div>
         <Button asChild>
@@ -121,10 +140,10 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">
-              {totalVideos || 0}
+              {stats.total}
             </div>
             <p className="text-xs text-gray-500">
-              {readyVideos || 0} ready, {processingVideos || 0} processing
+              {stats.ready} ready, {stats.processing} processing
             </p>
           </CardContent>
         </Card>
@@ -148,13 +167,13 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {/* Recent Videos (placeholder) */}
+      {/* Recent Videos */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
           <CardTitle className="text-white">Recent Videos</CardTitle>
         </CardHeader>
         <CardContent>
-          {totalVideos === 0 ? (
+          {stats.total === 0 ? (
             <div className="text-center py-12">
               <Video className="h-12 w-12 mx-auto text-gray-600 mb-4" />
               <h3 className="text-lg font-medium text-white mb-2">

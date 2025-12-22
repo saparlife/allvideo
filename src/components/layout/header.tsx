@@ -38,7 +38,7 @@ export function Header({ user }: HeaderProps) {
         .map((n) => n[0])
         .join("")
         .toUpperCase()
-    : user.email[0].toUpperCase();
+    : user.email?.[0]?.toUpperCase() || "U";
 
   return (
     <header className="h-16 border-b border-gray-800 bg-gray-900 flex items-center justify-between px-6">
