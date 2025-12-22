@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,8 +56,10 @@ function formatBytes(bytes: number): string {
 export default function SubscriptionPage() {
   const [loading, setLoading] = useState(true);
   const [storageUsed, setStorageUsed] = useState(0);
-  const [storageLimit, setStorageLimit] = useState(50 * 1024 * 1024 * 1024);
+  const [storageLimit, setStorageLimit] = useState(10 * 1024 * 1024 * 1024); // 10GB free default
+  const [currentPlan, setCurrentPlan] = useState<string>("free");
   const supabase = createClient();
+  const router = useRouter();
 
   useEffect(() => {
     async function loadUsage() {
@@ -72,7 +75,21 @@ export default function SubscriptionPage() {
 
       if (data) {
         setStorageUsed(data.storage_used_bytes || 0);
-        setStorageLimit(data.storage_limit_bytes || 50 * 1024 * 1024 * 1024);
+        const limit = data.storage_limit_bytes || 10 * 1024 * 1024 * 1024;
+        setStorageLimit(limit);
+
+        // Determine current plan based on storage limit
+        if (limit >= 5 * 1024 * 1024 * 1024 * 1024) {
+          setCurrentPlan("enterprise");
+        } else if (limit >= 1024 * 1024 * 1024 * 1024) {
+          setCurrentPlan("scale");
+        } else if (limit >= 200 * 1024 * 1024 * 1024) {
+          setCurrentPlan("growth");
+        } else if (limit >= 50 * 1024 * 1024 * 1024) {
+          setCurrentPlan("starter");
+        } else {
+          setCurrentPlan("free");
+        }
       }
       setLoading(false);
     }
@@ -97,13 +114,20 @@ export default function SubscriptionPage() {
         <p className="text-gray-400">Manage your plan and billing</p>
       </div>
 
-      {/* Current Usage */}
+      {/* Current Plan */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
-          <CardTitle className="text-white">Current Usage</CardTitle>
-          <CardDescription className="text-gray-400">
-            Your storage usage this billing period
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-white">Current Plan</CardTitle>
+              <CardDescription className="text-gray-400">
+                Your storage usage this billing period
+              </CardDescription>
+            </div>
+            <Badge className={currentPlan === "free" ? "bg-gray-600" : "bg-violet-600"}>
+              {currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)}
+            </Badge>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex justify-between text-sm">
@@ -161,8 +185,16 @@ export default function SubscriptionPage() {
                 <Button
                   className={`w-full ${plan.popular ? "bg-violet-600 hover:bg-violet-700" : ""}`}
                   variant={plan.popular ? "default" : "outline"}
+                  disabled={currentPlan === plan.name.toLowerCase()}
+                  onClick={() => {
+                    if (plan.name === "Enterprise") {
+                      window.location.href = "mailto:hello@unlimvideo.com";
+                    } else {
+                      router.push(`/checkout?plan=${plan.name.toLowerCase()}`);
+                    }
+                  }}
                 >
-                  Upgrade
+                  {currentPlan === plan.name.toLowerCase() ? "Current Plan" : plan.name === "Enterprise" ? "Contact Sales" : "Upgrade"}
                 </Button>
               </CardContent>
             </Card>
