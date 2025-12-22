@@ -6,13 +6,42 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, Infinity } from "lucide-react";
 
 const plans = [
-  { name: "Free", price: "$0", storage: "10 GB", storageBytres: 10 * 1024 * 1024 * 1024, current: true },
-  { name: "Starter", price: "$9/mo", storage: "100 GB", storageBytes: 100 * 1024 * 1024 * 1024, current: false },
-  { name: "Pro", price: "$39/mo", storage: "500 GB", storageBytes: 500 * 1024 * 1024 * 1024, current: false, popular: true },
-  { name: "Business", price: "$149/mo", storage: "2 TB", storageBytes: 2 * 1024 * 1024 * 1024 * 1024, current: false },
+  {
+    name: "Starter",
+    price: "$29/mo",
+    storage: "50 GB",
+    storageBytes: 50 * 1024 * 1024 * 1024,
+    features: ["50 GB storage", "Unlimited bandwidth", "1080p transcoding", "API access"],
+    current: false
+  },
+  {
+    name: "Growth",
+    price: "$79/mo",
+    storage: "200 GB",
+    storageBytes: 200 * 1024 * 1024 * 1024,
+    features: ["200 GB storage", "Unlimited bandwidth", "1080p transcoding", "Analytics", "Priority support"],
+    current: false,
+    popular: true
+  },
+  {
+    name: "Scale",
+    price: "$199/mo",
+    storage: "1 TB",
+    storageBytes: 1024 * 1024 * 1024 * 1024,
+    features: ["1 TB storage", "Unlimited bandwidth", "1080p transcoding", "Advanced analytics", "Custom branding"],
+    current: false
+  },
+  {
+    name: "Enterprise",
+    price: "$499/mo",
+    storage: "5 TB",
+    storageBytes: 5 * 1024 * 1024 * 1024 * 1024,
+    features: ["5 TB storage", "Unlimited bandwidth", "1080p transcoding", "White-label", "SLA guarantee"],
+    current: false
+  },
 ];
 
 function formatBytes(bytes: number): string {
@@ -26,7 +55,7 @@ function formatBytes(bytes: number): string {
 export default function SubscriptionPage() {
   const [loading, setLoading] = useState(true);
   const [storageUsed, setStorageUsed] = useState(0);
-  const [storageLimit, setStorageLimit] = useState(10 * 1024 * 1024 * 1024);
+  const [storageLimit, setStorageLimit] = useState(50 * 1024 * 1024 * 1024);
   const supabase = createClient();
 
   useEffect(() => {
@@ -43,7 +72,7 @@ export default function SubscriptionPage() {
 
       if (data) {
         setStorageUsed(data.storage_used_bytes || 0);
-        setStorageLimit(data.storage_limit_bytes || 10 * 1024 * 1024 * 1024);
+        setStorageLimit(data.storage_limit_bytes || 50 * 1024 * 1024 * 1024);
       }
       setLoading(false);
     }
@@ -85,6 +114,11 @@ export default function SubscriptionPage() {
           </div>
           <Progress value={usagePercent} className="h-2" />
           <p className="text-xs text-gray-500">{usagePercent}% of your storage used</p>
+
+          <div className="flex items-center gap-2 mt-4 p-3 bg-violet-500/10 border border-violet-500/20 rounded-lg">
+            <Infinity className="w-5 h-5 text-violet-400" />
+            <span className="text-violet-400 text-sm">Unlimited bandwidth included with all plans</span>
+          </div>
         </CardContent>
       </Card>
 
@@ -96,11 +130,11 @@ export default function SubscriptionPage() {
             <Card
               key={plan.name}
               className={`bg-gray-900 border-gray-800 relative ${
-                plan.popular ? "ring-2 ring-blue-500" : ""
+                plan.popular ? "ring-2 ring-violet-500" : ""
               }`}
             >
               {plan.popular && (
-                <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-blue-500">
+                <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-violet-500">
                   Popular
                 </Badge>
               )}
@@ -110,28 +144,25 @@ export default function SubscriptionPage() {
                 <CardDescription className="text-gray-400">
                   {plan.storage} storage
                 </CardDescription>
+                <div className="flex items-center gap-1 mt-1">
+                  <Infinity className="w-3 h-3 text-violet-400" />
+                  <span className="text-violet-400 text-xs">Unlimited bandwidth</span>
+                </div>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 mb-4">
-                  <li className="flex items-center gap-2 text-sm text-gray-300">
-                    <Check className="w-4 h-4 text-green-500" />
-                    HLS transcoding
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-gray-300">
-                    <Check className="w-4 h-4 text-green-500" />
-                    API access
-                  </li>
-                  <li className="flex items-center gap-2 text-sm text-gray-300">
-                    <Check className="w-4 h-4 text-green-500" />
-                    CDN delivery
-                  </li>
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-center gap-2 text-sm text-gray-300">
+                      <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                      {feature}
+                    </li>
+                  ))}
                 </ul>
                 <Button
-                  className="w-full"
-                  variant={plan.name === "Free" ? "outline" : "default"}
-                  disabled={plan.name === "Free"}
+                  className={`w-full ${plan.popular ? "bg-violet-600 hover:bg-violet-700" : ""}`}
+                  variant={plan.popular ? "default" : "outline"}
                 >
-                  {plan.name === "Free" ? "Current Plan" : "Upgrade"}
+                  Upgrade
                 </Button>
               </CardContent>
             </Card>
@@ -140,7 +171,7 @@ export default function SubscriptionPage() {
       </div>
 
       <p className="text-sm text-gray-500 text-center">
-        Need more storage? Contact us at hello@allvideo.one for enterprise plans up to 100TB.
+        Need more storage? Contact us at hello@unlimvideo.com for custom enterprise plans.
       </p>
     </div>
   );

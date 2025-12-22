@@ -69,7 +69,7 @@ export default async function VideoDetailPage({ params }: Props) {
     : undefined;
 
   const embedCode = hlsUrl
-    ? `<iframe src="${process.env.NEXT_PUBLIC_APP_URL || 'https://allvideo.one'}/embed/${video.id}" width="640" height="360" frameborder="0" allowfullscreen></iframe>`
+    ? `<iframe src="${process.env.NEXT_PUBLIC_APP_URL || 'https://unlimvideo.com'}/embed/${video.id}" width="640" height="360" frameborder="0" allowfullscreen></iframe>`
     : null;
 
   return (

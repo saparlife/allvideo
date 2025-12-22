@@ -84,10 +84,10 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
       {/* Logo */}
       <div className="p-6">
         <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-lg flex items-center justify-center">
             <Video className="w-5 h-5 text-white" />
           </div>
-          <span className="text-xl font-bold text-white">AllVideo</span>
+          <span className="text-xl font-bold text-white">UnlimVideo</span>
         </Link>
       </div>
 

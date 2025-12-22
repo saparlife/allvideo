@@ -119,10 +119,14 @@ export async function transcodeToHLS(
   const thumbnailPath = path.join(outputDir, "poster.jpg");
   await generateThumbnail(inputPath, thumbnailPath);
 
-  // Build FFmpeg command for HLS
+  // Build FFmpeg command for HLS with Vimeo-like compression
+  const { encoding } = config;
+
   const ffmpegArgs = [
     "-i", inputPath,
-    "-preset", "fast",
+    "-preset", encoding.preset,
+    "-profile:v", encoding.profile,
+    "-tune", encoding.tune,
     "-g", "48",
     "-keyint_min", "48",
     "-sc_threshold", "0",
@@ -139,13 +143,16 @@ export async function transcodeToHLS(
     filterComplex += `[0:v]scale=w=${res.width}:h=${res.height}:force_original_aspect_ratio=decrease,scale=trunc(iw/2)*2:trunc(ih/2)*2[v${index}];`;
     varStreamMap.push(`v:${index},a:${index}`);
 
+    // CRF-based encoding for much better compression
     ffmpegArgs.push(
       "-map", `[v${index}]`,
       "-map", "0:a?",
       `-c:v:${index}`, "libx264",
-      `-b:v:${index}`, res.bitrate,
+      `-crf:v:${index}`, String(res.crf),
+      `-maxrate:v:${index}`, res.maxrate,
+      `-bufsize:v:${index}`, res.bufsize,
       `-c:a:${index}`, "aac",
-      `-b:a:${index}`, "128k"
+      `-b:a:${index}`, encoding.audioBitrate
     );
   });
 

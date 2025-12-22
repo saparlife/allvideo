@@ -309,15 +309,15 @@ export default function ApiKeysPage() {
           <div>
             <h4 className="text-sm font-medium text-gray-200 mb-2">Get Video HLS URL</h4>
             <pre className="bg-gray-800 p-4 rounded-lg text-sm text-gray-300 overflow-x-auto">
-{`curl -X GET "https://allvideo.one/api/public/videos/{videoId}" \\
-  -H "X-API-Key: av_live_xxxxx"`}
+{`curl -X GET "https://unlimvideo.com/api/public/videos/{videoId}" \\
+  -H "X-API-Key: uv_live_xxxxx"`}
             </pre>
           </div>
           <div>
             <h4 className="text-sm font-medium text-gray-200 mb-2">Upload Video</h4>
             <pre className="bg-gray-800 p-4 rounded-lg text-sm text-gray-300 overflow-x-auto">
-{`curl -X POST "https://allvideo.one/api/public/videos" \\
-  -H "X-API-Key: av_live_xxxxx" \\
+{`curl -X POST "https://unlimvideo.com/api/public/videos" \\
+  -H "X-API-Key: uv_live_xxxxx" \\
   -H "Content-Type: application/json" \\
   -d '{"title": "My Video", "filename": "video.mp4", "size": 10485760}'`}
             </pre>
