@@ -303,37 +303,69 @@ export default function ApiKeysPage() {
 
       <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle className="text-gray-900">API Usage</CardTitle>
+          <CardTitle className="text-gray-900">API Reference</CardTitle>
+          <CardDescription className="text-gray-500">
+            Base URL: <code className="bg-gray-100 px-2 py-0.5 rounded text-sm">https://video.lovsell.com/api/public</code>
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-2">List All Videos</h4>
-            <pre className="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-x-auto">
-{`curl -X GET "https://video.lovsell.com/api/public/videos" \\
-  -H "X-API-Key: av_live_xxxxx"`}
-            </pre>
+        <CardContent className="space-y-6">
+          {/* Endpoints Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-2 text-gray-500 font-medium">Method</th>
+                  <th className="text-left py-2 text-gray-500 font-medium">Endpoint</th>
+                  <th className="text-left py-2 text-gray-500 font-medium">Description</th>
+                </tr>
+              </thead>
+              <tbody className="text-gray-700">
+                <tr className="border-b border-gray-100">
+                  <td className="py-2"><Badge className="bg-emerald-500 text-white text-xs">GET</Badge></td>
+                  <td className="py-2 font-mono text-xs">/videos</td>
+                  <td className="py-2">List all your videos</td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="py-2"><Badge className="bg-emerald-500 text-white text-xs">GET</Badge></td>
+                  <td className="py-2 font-mono text-xs">/videos/:id</td>
+                  <td className="py-2">Get video details (HLS URL, thumbnail, embed)</td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="py-2"><Badge className="bg-blue-500 text-white text-xs">POST</Badge></td>
+                  <td className="py-2 font-mono text-xs">/videos</td>
+                  <td className="py-2">Create video & get upload URL</td>
+                </tr>
+                <tr className="border-b border-gray-100">
+                  <td className="py-2"><Badge className="bg-blue-500 text-white text-xs">POST</Badge></td>
+                  <td className="py-2 font-mono text-xs">/videos/:id/complete</td>
+                  <td className="py-2">Confirm upload & start processing</td>
+                </tr>
+                <tr>
+                  <td className="py-2"><Badge className="bg-red-500 text-white text-xs">DELETE</Badge></td>
+                  <td className="py-2 font-mono text-xs">/videos/:id</td>
+                  <td className="py-2">Delete video</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
+
+          {/* Example */}
           <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Get Video Details</h4>
-            <pre className="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-x-auto">
-{`curl -X GET "https://video.lovsell.com/api/public/videos/{videoId}" \\
-  -H "X-API-Key: av_live_xxxxx"`}
+            <h4 className="text-sm font-medium text-gray-700 mb-3">Example: Get Video</h4>
+            <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm overflow-x-auto">
+{`curl https://video.lovsell.com/api/public/videos/{videoId} \\
+  -H "X-API-Key: YOUR_API_KEY"`}
             </pre>
-          </div>
-          <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Upload Video</h4>
-            <pre className="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-x-auto">
-{`curl -X POST "https://video.lovsell.com/api/public/videos" \\
-  -H "X-API-Key: av_live_xxxxx" \\
-  -H "Content-Type: application/json" \\
-  -d '{"title": "My Video", "filename": "video.mp4", "size": 10485760}'`}
-            </pre>
-          </div>
-          <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Delete Video</h4>
-            <pre className="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-x-auto">
-{`curl -X DELETE "https://video.lovsell.com/api/public/videos/{videoId}" \\
-  -H "X-API-Key: av_live_xxxxx"`}
+            <p className="text-xs text-gray-500 mt-2">Response:</p>
+            <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm overflow-x-auto mt-1">
+{`{
+  "id": "abc123",
+  "title": "My Video",
+  "status": "ready",
+  "hls": "https://cdn.lovsell.com/.../master.m3u8",
+  "thumbnail": "https://cdn.lovsell.com/.../poster.jpg",
+  "embed": "https://video.lovsell.com/embed/abc123"
+}`}
             </pre>
           </div>
         </CardContent>
