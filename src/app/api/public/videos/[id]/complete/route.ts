@@ -17,7 +17,7 @@ export async function POST(
     }
 
     const { id } = await params;
-    const supabase = await createAdminClient();
+    const supabase = createAdminClient();
 
     // Get video and verify ownership
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

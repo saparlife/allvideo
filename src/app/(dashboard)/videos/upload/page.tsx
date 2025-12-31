@@ -242,15 +242,15 @@ export default function UploadPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Upload Video</h1>
-        <p className="text-gray-400">
+        <h1 className="text-2xl font-bold text-gray-900">Upload Video</h1>
+        <p className="text-gray-500">
           Upload a video file to your library
         </p>
       </div>
 
-      <Card className="bg-gray-900 border-gray-800">
+      <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle className="text-white">Video File</CardTitle>
+          <CardTitle className="text-gray-900">Video File</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Drop Zone */}
@@ -258,19 +258,19 @@ export default function UploadPage() {
             <div
               className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
                 dragActive
-                  ? "border-blue-500 bg-blue-500/10"
-                  : "border-gray-700 hover:border-gray-600"
+                  ? "border-indigo-500 bg-indigo-50"
+                  : "border-gray-300 hover:border-gray-400"
               }`}
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
               onDrop={handleDrop}
             >
-              <Upload className="h-12 w-12 mx-auto text-gray-500 mb-4" />
-              <p className="text-lg font-medium text-white mb-2">
+              <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-lg font-medium text-gray-900 mb-2">
                 Drop your video here
               </p>
-              <p className="text-sm text-gray-400 mb-4">
+              <p className="text-sm text-gray-500 mb-4">
                 or click to browse
               </p>
               <Input
@@ -280,31 +280,31 @@ export default function UploadPage() {
                 className="hidden"
                 id="file-upload"
               />
-              <Button asChild variant="outline">
+              <Button asChild variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
                 <label htmlFor="file-upload" className="cursor-pointer">
                   Select File
                 </label>
               </Button>
-              <p className="text-xs text-gray-500 mt-4">
+              <p className="text-xs text-gray-400 mt-4">
                 Supported formats: MP4, MOV, AVI, MKV, WMV (max 10GB)
               </p>
             </div>
           ) : (
-            <div className="bg-gray-800 rounded-lg p-4">
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-gray-700 rounded-lg flex items-center justify-center">
-                  <Video className="h-6 w-6 text-gray-400" />
+                <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                  <Video className="h-6 w-6 text-gray-500" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-white truncate">{file.name}</p>
-                  <p className="text-sm text-gray-400">{formatFileSize(file.size)}</p>
+                  <p className="font-medium text-gray-900 truncate">{file.name}</p>
+                  <p className="text-sm text-gray-500">{formatFileSize(file.size)}</p>
                 </div>
                 {status === "idle" && (
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setFile(null)}
-                    className="text-gray-400 hover:text-white"
+                    className="text-gray-400 hover:text-gray-600"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -315,14 +315,14 @@ export default function UploadPage() {
               {(status === "uploading" || status === "processing") && (
                 <div className="mt-4 space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">
+                    <span className="text-gray-500">
                       {status === "uploading" ? "Uploading..." : "Processing..."}
                     </span>
                     <div className="flex items-center gap-3">
                       {uploadSpeed && status === "uploading" && (
-                        <span className="text-green-400">{uploadSpeed}</span>
+                        <span className="text-emerald-600">{uploadSpeed}</span>
                       )}
-                      <span className="text-white">{uploadProgress}%</span>
+                      <span className="text-gray-900 font-medium">{uploadProgress}%</span>
                     </div>
                   </div>
                   <Progress value={uploadProgress} className="h-2" />
@@ -331,7 +331,7 @@ export default function UploadPage() {
                       variant="ghost"
                       size="sm"
                       onClick={handleCancel}
-                      className="text-red-400 hover:text-red-300 mt-2"
+                      className="text-red-500 hover:text-red-600 mt-2"
                     >
                       Cancel Upload
                     </Button>
@@ -341,7 +341,7 @@ export default function UploadPage() {
 
               {/* Complete */}
               {status === "complete" && (
-                <div className="mt-4 flex items-center gap-2 text-green-400">
+                <div className="mt-4 flex items-center gap-2 text-emerald-600">
                   <CheckCircle className="h-5 w-5" />
                   <span>Upload complete! Redirecting...</span>
                 </div>
@@ -349,7 +349,7 @@ export default function UploadPage() {
 
               {/* Error */}
               {status === "error" && (
-                <div className="mt-4 flex items-center gap-2 text-red-400">
+                <div className="mt-4 flex items-center gap-2 text-red-500">
                   <AlertCircle className="h-5 w-5" />
                   <span>{errorMessage}</span>
                 </div>
@@ -360,7 +360,7 @@ export default function UploadPage() {
           {/* Title Input */}
           {file && status === "idle" && (
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-gray-200">
+              <Label htmlFor="title" className="text-gray-700">
                 Video Title
               </Label>
               <Input
@@ -368,7 +368,7 @@ export default function UploadPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter video title"
-                className="bg-gray-800 border-gray-700 text-white"
+                className="bg-white border-gray-300 text-gray-900"
               />
             </div>
           )}
@@ -377,7 +377,7 @@ export default function UploadPage() {
           {file && status === "idle" && (
             <Button
               onClick={handleUpload}
-              className="w-full"
+              className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white"
               disabled={!title}
             >
               <Upload className="mr-2 h-4 w-4" />

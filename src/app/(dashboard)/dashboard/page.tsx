@@ -77,12 +77,12 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-          <p className="text-gray-400">
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-500">
             Welcome back, {profile?.name || profile?.email}
           </p>
         </div>
-        <Button asChild>
+        <Button asChild className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white">
           <Link href="/videos/upload">
             <Plus className="mr-2 h-4 w-4" />
             Upload Video
@@ -93,15 +93,15 @@ export default function DashboardPage() {
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* Storage */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-white border-gray-200">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-400">
+            <CardTitle className="text-sm font-medium text-gray-500">
               Storage Used
             </CardTitle>
             <HardDrive className="h-4 w-4 text-gray-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">
+            <div className="text-2xl font-bold text-gray-900">
               {formatBytes(profile?.storage_used_bytes || 0)}
             </div>
             <p className="text-xs text-gray-500 mb-2">
@@ -112,15 +112,15 @@ export default function DashboardPage() {
         </Card>
 
         {/* Bandwidth */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-white border-gray-200">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-400">
+            <CardTitle className="text-sm font-medium text-gray-500">
               Bandwidth (Monthly)
             </CardTitle>
             <Wifi className="h-4 w-4 text-gray-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">
+            <div className="text-2xl font-bold text-gray-900">
               {formatBytes(profile?.bandwidth_used_bytes || 0)}
             </div>
             <p className="text-xs text-gray-500 mb-2">
@@ -131,15 +131,15 @@ export default function DashboardPage() {
         </Card>
 
         {/* Total Videos */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-white border-gray-200">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-400">
+            <CardTitle className="text-sm font-medium text-gray-500">
               Total Videos
             </CardTitle>
             <Video className="h-4 w-4 text-gray-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">
+            <div className="text-2xl font-bold text-gray-900">
               {stats.total}
             </div>
             <p className="text-xs text-gray-500">
@@ -149,15 +149,15 @@ export default function DashboardPage() {
         </Card>
 
         {/* Quick Upload */}
-        <Card className="bg-gray-900 border-gray-800">
+        <Card className="bg-white border-gray-200">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-400">
+            <CardTitle className="text-sm font-medium text-gray-500">
               Quick Actions
             </CardTitle>
             <Upload className="h-4 w-4 text-gray-400" />
           </CardHeader>
           <CardContent>
-            <Button asChild variant="outline" className="w-full">
+            <Button asChild variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50">
               <Link href="/videos/upload">
                 <Upload className="mr-2 h-4 w-4" />
                 Upload New Video
@@ -168,21 +168,21 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Videos */}
-      <Card className="bg-gray-900 border-gray-800">
+      <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle className="text-white">Recent Videos</CardTitle>
+          <CardTitle className="text-gray-900">Recent Videos</CardTitle>
         </CardHeader>
         <CardContent>
           {stats.total === 0 ? (
             <div className="text-center py-12">
-              <Video className="h-12 w-12 mx-auto text-gray-600 mb-4" />
-              <h3 className="text-lg font-medium text-white mb-2">
+              <Video className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
                 No videos yet
               </h3>
-              <p className="text-gray-400 mb-4">
+              <p className="text-gray-500 mb-4">
                 Upload your first video to get started
               </p>
-              <Button asChild>
+              <Button asChild className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white">
                 <Link href="/videos/upload">
                   <Plus className="mr-2 h-4 w-4" />
                   Upload Video
@@ -190,7 +190,7 @@ export default function DashboardPage() {
               </Button>
             </div>
           ) : (
-            <p className="text-gray-400">
+            <p className="text-gray-500">
               Your recent videos will appear here
             </p>
           )}

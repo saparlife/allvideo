@@ -111,34 +111,27 @@ const faqs = [
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-[#030306] text-white overflow-hidden">
-      {/* Background effects */}
+    <div className="min-h-screen bg-gray-50 text-gray-900 overflow-hidden">
+      {/* Background */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-600/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl" />
-        <div
-          className="absolute inset-0 opacity-[0.02]"
-          style={{
-            backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-            backgroundSize: '64px 64px'
-          }}
-        />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-200/50 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-purple-200/50 rounded-full blur-3xl" />
       </div>
 
       {/* Header */}
-      <header className="relative z-10">
-        <nav className="container mx-auto px-6 py-6 flex items-center justify-between">
+      <header className="relative z-10 bg-white/80 backdrop-blur-md border-b border-gray-200">
+        <nav className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/25">
+            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold">UnlimVideo</span>
+            <span className="text-xl font-bold text-gray-900">UnlimVideo</span>
           </Link>
           <div className="flex items-center gap-6">
-            <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors">
+            <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
               Sign in
             </Link>
-            <Button asChild size="sm" className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 font-medium">
+            <Button asChild size="sm" className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-medium">
               <Link href="/register">Start Free</Link>
             </Button>
           </div>
@@ -148,18 +141,18 @@ export default function PricingPage() {
       <main className="relative z-10 container mx-auto px-6 py-20">
         {/* Hero */}
         <div className="text-center mb-20">
-          <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full px-4 py-2 mb-8">
-            <Infinity className="w-4 h-4 text-violet-400" />
-            <span className="text-sm text-gray-300">Unlimited bandwidth on all plans</span>
+          <div className="inline-flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-2 mb-8 shadow-sm">
+            <Infinity className="w-4 h-4 text-indigo-500" />
+            <span className="text-sm text-gray-600">Unlimited bandwidth on all plans</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 text-gray-900">
             Simple, predictable
             <br />
-            <span className="bg-gradient-to-r from-violet-400 via-indigo-400 to-violet-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
               pricing
             </span>
           </h1>
-          <p className="text-lg text-gray-400 max-w-xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-xl mx-auto">
             Stop paying for views. Get unlimited bandwidth with every plan.
             Save thousands compared to Vimeo.
           </p>
@@ -167,19 +160,16 @@ export default function PricingPage() {
 
         {/* Comparison Banner */}
         <div className="max-w-3xl mx-auto mb-20">
-          <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-violet-600/20 via-indigo-600/20 to-violet-600/20 rounded-2xl blur-xl" />
-            <div className="relative bg-[#0A0A0F]/80 backdrop-blur-xl border border-white/10 rounded-xl p-6">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Vimeo charges for overages</p>
-                  <p className="text-lg font-semibold">50TB/month = <span className="text-red-400">$10,000+/year</span></p>
-                </div>
-                <div className="hidden md:block w-px h-12 bg-white/10" />
-                <div className="text-center md:text-right">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Same on UnlimVideo</p>
-                  <p className="text-lg font-semibold">50TB/month = <span className="text-emerald-400">$0 extra</span></p>
-                </div>
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Vimeo charges for overages</p>
+                <p className="text-lg font-semibold text-gray-900">50TB/month = <span className="text-red-500">$10,000+/year</span></p>
+              </div>
+              <div className="hidden md:block w-px h-12 bg-gray-200" />
+              <div className="text-center md:text-right">
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Same on UnlimVideo</p>
+                <p className="text-lg font-semibold text-gray-900">50TB/month = <span className="text-emerald-500">$0 extra</span></p>
               </div>
             </div>
           </div>
@@ -190,41 +180,41 @@ export default function PricingPage() {
           {plans.map((plan) => (
             <div key={plan.name} className={`group relative ${plan.popular ? 'lg:scale-105 lg:z-10' : ''}`}>
               {plan.popular && (
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl blur opacity-50" />
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl blur opacity-30" />
               )}
-              <div className={`relative h-full bg-[#0A0A0F] rounded-2xl p-6 border ${plan.popular ? 'border-violet-500/50' : 'border-white/10'} transition-all duration-300 hover:border-white/20`}>
+              <div className={`relative h-full bg-white rounded-2xl p-6 border ${plan.popular ? 'border-indigo-300 shadow-lg' : 'border-gray-200'} transition-all duration-300 hover:shadow-md`}>
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-xs font-medium px-3 py-1 rounded-full">
+                    <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-medium px-3 py-1 rounded-full">
                       Most Popular
                     </span>
                   </div>
                 )}
 
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-2">{plan.name}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{plan.name}</h3>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold">{plan.price}</span>
+                    <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
                     <span className="text-gray-500">/mo</span>
                   </div>
-                  <p className="text-sm text-gray-400 mt-1">{plan.storage} storage</p>
+                  <p className="text-sm text-gray-500 mt-1">{plan.storage} storage</p>
                   <div className="flex items-center gap-1.5 mt-2">
-                    <Infinity className="w-3.5 h-3.5 text-violet-400" />
-                    <span className="text-xs text-violet-400 font-medium">Unlimited bandwidth</span>
+                    <Infinity className="w-3.5 h-3.5 text-indigo-500" />
+                    <span className="text-xs text-indigo-600 font-medium">Unlimited bandwidth</span>
                   </div>
                 </div>
 
                 <ul className="space-y-3 mb-6">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-gray-300">{feature}</span>
+                      <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-gray-600">{feature}</span>
                     </li>
                   ))}
                 </ul>
 
                 <Button
-                  className={`w-full ${plan.popular ? 'bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700' : 'bg-white/10 hover:bg-white/20'} font-medium`}
+                  className={`w-full ${plan.popular ? 'bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'} font-medium`}
                   asChild
                 >
                   <Link href={
@@ -244,12 +234,12 @@ export default function PricingPage() {
 
         {/* FAQ */}
         <div className="max-w-3xl mx-auto mb-24">
-          <h2 className="text-2xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+          <h2 className="text-2xl font-bold text-center text-gray-900 mb-12">Frequently Asked Questions</h2>
           <div className="space-y-4">
             {faqs.map((faq) => (
-              <div key={faq.q} className="bg-[#0A0A0F] border border-white/10 rounded-xl p-6 transition-all duration-300 hover:border-white/20">
-                <h3 className="font-semibold mb-2">{faq.q}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{faq.a}</p>
+              <div key={faq.q} className="bg-white border border-gray-200 rounded-xl p-6 transition-all duration-300 hover:shadow-md">
+                <h3 className="font-semibold text-gray-900 mb-2">{faq.q}</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">{faq.a}</p>
               </div>
             ))}
           </div>
@@ -257,34 +247,34 @@ export default function PricingPage() {
 
         {/* CTA */}
         <div className="max-w-2xl mx-auto text-center">
-          <p className="text-gray-400 mb-6">
+          <p className="text-gray-600 mb-6">
             Need a custom plan or have questions?
           </p>
-          <Button asChild className="bg-white/10 hover:bg-white/20 font-medium">
+          <Button asChild className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium">
             <a href="mailto:hello@unlimvideo.com">Contact Sales</a>
           </Button>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-white/5">
+      <footer className="relative z-10 bg-white border-t border-gray-200">
         <div className="container mx-auto px-6 py-12">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
                 <Zap className="w-4 h-4 text-white" />
               </div>
-              <span className="font-semibold">UnlimVideo</span>
+              <span className="font-semibold text-gray-900">UnlimVideo</span>
             </div>
             <div className="flex items-center gap-8">
-              <Link href="/" className="text-sm text-gray-500 hover:text-white transition-colors">
+              <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
                 Home
               </Link>
-              <a href="mailto:hello@unlimvideo.com" className="text-sm text-gray-500 hover:text-white transition-colors">
+              <a href="mailto:hello@unlimvideo.com" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
                 Contact
               </a>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-500">
               &copy; {new Date().getFullYear()} UnlimVideo
             </p>
           </div>

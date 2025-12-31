@@ -59,7 +59,7 @@ export function VideoPlayer({ src, poster }: VideoPlayerProps) {
   return (
     <video
       ref={videoRef}
-      className="w-full aspect-video bg-black rounded-lg"
+      className="w-full aspect-video bg-gray-900 rounded-lg"
       controls
       poster={poster}
       playsInline

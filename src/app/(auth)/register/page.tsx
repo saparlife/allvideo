@@ -24,7 +24,7 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -40,6 +40,12 @@ export default function RegisterPage() {
         return;
       }
 
+      // Supabase returns success but empty identities if email already exists
+      if (data.user && data.user.identities?.length === 0) {
+        toast.error("This email is already registered. Please sign in instead.");
+        return;
+      }
+
       toast.success("Account created! Check your email to confirm.");
       router.push("/login");
     } catch {
@@ -50,11 +56,11 @@ export default function RegisterPage() {
   };
 
   return (
-    <Card className="bg-gray-800/50 border-gray-700">
+    <Card className="bg-white border-gray-200 shadow-sm">
       <form onSubmit={handleSubmit}>
         <CardContent className="pt-6 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-gray-200">
+            <Label htmlFor="name" className="text-gray-700">
               Name
             </Label>
             <Input
@@ -64,11 +70,11 @@ export default function RegisterPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
+              className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-gray-200">
+            <Label htmlFor="email" className="text-gray-700">
               Email
             </Label>
             <Input
@@ -78,11 +84,11 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
+              className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-gray-200">
+            <Label htmlFor="password" className="text-gray-700">
               Password
             </Label>
             <Input
@@ -93,17 +99,17 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
+              className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
             />
           </div>
-          <p className="text-xs text-gray-400 pb-2">
+          <p className="text-xs text-gray-500 pb-2">
             By signing up, you agree to our Terms of Service and get 10GB of free storage.
           </p>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <Button
             type="submit"
-            className="w-full"
+            className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -115,9 +121,9 @@ export default function RegisterPage() {
               "Create account"
             )}
           </Button>
-          <p className="text-sm text-gray-400 text-center">
+          <p className="text-sm text-gray-500 text-center">
             Already have an account?{" "}
-            <Link href="/login" className="text-blue-400 hover:underline">
+            <Link href="/login" className="text-indigo-600 hover:underline">
               Sign in
             </Link>
           </p>

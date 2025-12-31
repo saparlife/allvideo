@@ -24,7 +24,7 @@ export async function verifyApiKey(request: Request): Promise<ApiKeyAuth | null>
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const keyHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: keyData, error } = await (supabase as any)

@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
       return apiError("Missing required fields: title, filename, size");
     }
 
-    const supabase = await createAdminClient();
+    const supabase = createAdminClient();
 
     // Check user storage limit
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
       return apiError("API key does not have read permission", 403);
     }
 
-    const supabase = await createAdminClient();
+    const supabase = createAdminClient();
 
     // Get all videos for the user
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -75,41 +75,41 @@ export default function SettingsPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Settings</h1>
-        <p className="text-gray-400">Manage your account settings</p>
+        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+        <p className="text-gray-500">Manage your account settings</p>
       </div>
 
-      <Card className="bg-gray-900 border-gray-800">
+      <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle className="text-white">Profile</CardTitle>
-          <CardDescription className="text-gray-400">
+          <CardTitle className="text-gray-900">Profile</CardTitle>
+          <CardDescription className="text-gray-500">
             Update your personal information
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-gray-200">Name</Label>
+            <Label htmlFor="name" className="text-gray-700">Name</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="bg-gray-800 border-gray-700 text-white"
+              className="bg-white border-gray-300 text-gray-900"
               placeholder="Your name"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-gray-200">Email</Label>
+            <Label htmlFor="email" className="text-gray-700">Email</Label>
             <Input
               id="email"
               value={email}
               disabled
-              className="bg-gray-800 border-gray-700 text-gray-400"
+              className="bg-gray-100 border-gray-300 text-gray-500"
             />
             <p className="text-xs text-gray-500">Email cannot be changed</p>
           </div>
 
-          <Button onClick={handleSave} disabled={saving}>
+          <Button onClick={handleSave} disabled={saving} className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white">
             {saving ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -125,10 +125,10 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card className="bg-gray-900 border-gray-800">
+      <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle className="text-white">Danger Zone</CardTitle>
-          <CardDescription className="text-gray-400">
+          <CardTitle className="text-gray-900">Danger Zone</CardTitle>
+          <CardDescription className="text-gray-500">
             Irreversible actions
           </CardDescription>
         </CardHeader>

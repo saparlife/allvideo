@@ -110,80 +110,80 @@ export default function SubscriptionPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Subscription</h1>
-        <p className="text-gray-400">Manage your plan and billing</p>
+        <h1 className="text-2xl font-bold text-gray-900">Subscription</h1>
+        <p className="text-gray-500">Manage your plan and billing</p>
       </div>
 
       {/* Current Plan */}
-      <Card className="bg-gray-900 border-gray-800">
+      <Card className="bg-white border-gray-200">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-white">Current Plan</CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardTitle className="text-gray-900">Current Plan</CardTitle>
+              <CardDescription className="text-gray-500">
                 Your storage usage this billing period
               </CardDescription>
             </div>
-            <Badge className={currentPlan === "free" ? "bg-gray-600" : "bg-violet-600"}>
+            <Badge className={currentPlan === "free" ? "bg-gray-500" : "bg-indigo-500"}>
               {currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)}
             </Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex justify-between text-sm">
-            <span className="text-gray-400">Storage</span>
-            <span className="text-white">
+            <span className="text-gray-500">Storage</span>
+            <span className="text-gray-900">
               {formatBytes(storageUsed)} / {formatBytes(storageLimit)}
             </span>
           </div>
           <Progress value={usagePercent} className="h-2" />
           <p className="text-xs text-gray-500">{usagePercent}% of your storage used</p>
 
-          <div className="flex items-center gap-2 mt-4 p-3 bg-violet-500/10 border border-violet-500/20 rounded-lg">
-            <Infinity className="w-5 h-5 text-violet-400" />
-            <span className="text-violet-400 text-sm">Unlimited bandwidth included with all plans</span>
+          <div className="flex items-center gap-2 mt-4 p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
+            <Infinity className="w-5 h-5 text-indigo-500" />
+            <span className="text-indigo-600 text-sm">Unlimited bandwidth included with all plans</span>
           </div>
         </CardContent>
       </Card>
 
       {/* Plans */}
       <div>
-        <h2 className="text-lg font-semibold text-white mb-4">Available Plans</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Available Plans</h2>
         <div className="grid md:grid-cols-4 gap-4">
           {plans.map((plan) => (
             <Card
               key={plan.name}
-              className={`bg-gray-900 border-gray-800 relative ${
-                plan.popular ? "ring-2 ring-violet-500" : ""
+              className={`bg-white border-gray-200 relative ${
+                plan.popular ? "ring-2 ring-indigo-500" : ""
               }`}
             >
               {plan.popular && (
-                <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-violet-500">
+                <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-indigo-500">
                   Popular
                 </Badge>
               )}
               <CardHeader>
-                <CardTitle className="text-white">{plan.name}</CardTitle>
-                <div className="text-2xl font-bold text-white">{plan.price}</div>
-                <CardDescription className="text-gray-400">
+                <CardTitle className="text-gray-900">{plan.name}</CardTitle>
+                <div className="text-2xl font-bold text-gray-900">{plan.price}</div>
+                <CardDescription className="text-gray-500">
                   {plan.storage} storage
                 </CardDescription>
                 <div className="flex items-center gap-1 mt-1">
-                  <Infinity className="w-3 h-3 text-violet-400" />
-                  <span className="text-violet-400 text-xs">Unlimited bandwidth</span>
+                  <Infinity className="w-3 h-3 text-indigo-500" />
+                  <span className="text-indigo-500 text-xs">Unlimited bandwidth</span>
                 </div>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 mb-4">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-2 text-sm text-gray-300">
-                      <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                    <li key={feature} className="flex items-center gap-2 text-sm text-gray-600">
+                      <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />
                       {feature}
                     </li>
                   ))}
                 </ul>
                 <Button
-                  className={`w-full ${plan.popular ? "bg-violet-600 hover:bg-violet-700" : ""}`}
+                  className={`w-full ${plan.popular ? "bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white" : "border-gray-300 text-gray-700 hover:bg-gray-50"}`}
                   variant={plan.popular ? "default" : "outline"}
                   disabled={currentPlan === plan.name.toLowerCase()}
                   onClick={() => {

@@ -44,11 +44,11 @@ export default function LoginPage() {
   };
 
   return (
-    <Card className="bg-gray-800/50 border-gray-700">
+    <Card className="bg-white border-gray-200 shadow-sm">
       <form onSubmit={handleSubmit}>
         <CardContent className="pt-6 pb-2 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-gray-200">
+            <Label htmlFor="email" className="text-gray-700">
               Email
             </Label>
             <Input
@@ -58,11 +58,11 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
+              className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-gray-200">
+            <Label htmlFor="password" className="text-gray-700">
               Password
             </Label>
             <Input
@@ -72,14 +72,14 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
+              className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
             />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <Button
             type="submit"
-            className="w-full"
+            className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -91,9 +91,9 @@ export default function LoginPage() {
               "Sign in"
             )}
           </Button>
-          <p className="text-sm text-gray-400 text-center">
+          <p className="text-sm text-gray-500 text-center">
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="text-blue-400 hover:underline">
+            <Link href="/register" className="text-indigo-600 hover:underline">
               Sign up
             </Link>
           </p>

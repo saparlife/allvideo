@@ -11,9 +11,7 @@ export async function POST(request: NextRequest) {
     console.log("Upload init: Starting...");
 
     const supabase = await createClient();
-    const adminDb = await createAdminClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db = adminDb as any;
+    const db = createAdminClient();
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     console.log("Upload init: Auth check", { userId: user?.id, authError });

@@ -19,7 +19,7 @@ export async function GET(
     }
 
     const { id } = await params;
-    const supabase = await createAdminClient();
+    const supabase = createAdminClient();
 
     // Get video
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,7 +64,7 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const supabase = await createAdminClient();
+    const supabase = createAdminClient();
 
     // Get video to verify ownership and get keys
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -159,50 +159,50 @@ export default function ApiKeysPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">API Keys</h1>
-          <p className="text-gray-400">Manage API keys for external integrations</p>
+          <h1 className="text-2xl font-bold text-gray-900">API Keys</h1>
+          <p className="text-gray-500">Manage API keys for external integrations</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white">
               <Plus className="mr-2 h-4 w-4" />
               Create API Key
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-gray-900 border-gray-800">
+          <DialogContent className="bg-white border-gray-200">
             <DialogHeader>
-              <DialogTitle className="text-white">
+              <DialogTitle className="text-gray-900">
                 {newKey ? "API Key Created" : "Create API Key"}
               </DialogTitle>
             </DialogHeader>
 
             {newKey ? (
               <div className="space-y-4">
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-gray-500">
                   Copy your API key now. You won&apos;t be able to see it again!
                 </p>
                 <div className="flex gap-2">
                   <Input
                     value={newKey}
                     readOnly
-                    className="bg-gray-800 border-gray-700 text-white font-mono text-sm"
+                    className="bg-gray-100 border-gray-300 text-gray-900 font-mono text-sm"
                   />
-                  <Button variant="outline" size="icon" onClick={handleCopy}>
+                  <Button variant="outline" size="icon" onClick={handleCopy} className="border-gray-300">
                     {copied ? (
-                      <Check className="h-4 w-4 text-green-500" />
+                      <Check className="h-4 w-4 text-emerald-500" />
                     ) : (
                       <Copy className="h-4 w-4" />
                     )}
                   </Button>
                 </div>
-                <Button onClick={closeDialog} className="w-full">
+                <Button onClick={closeDialog} className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white">
                   Done
                 </Button>
               </div>
             ) : (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="keyName" className="text-gray-200">
+                  <Label htmlFor="keyName" className="text-gray-700">
                     Key Name
                   </Label>
                   <Input
@@ -210,10 +210,10 @@ export default function ApiKeysPage() {
                     placeholder="e.g., Production, 1study Integration"
                     value={newKeyName}
                     onChange={(e) => setNewKeyName(e.target.value)}
-                    className="bg-gray-800 border-gray-700 text-white"
+                    className="bg-white border-gray-300 text-gray-900"
                   />
                 </div>
-                <Button onClick={handleCreate} disabled={creating} className="w-full">
+                <Button onClick={handleCreate} disabled={creating} className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white">
                   {creating ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -229,10 +229,10 @@ export default function ApiKeysPage() {
         </Dialog>
       </div>
 
-      <Card className="bg-gray-900 border-gray-800">
+      <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle className="text-white">Your API Keys</CardTitle>
-          <CardDescription className="text-gray-400">
+          <CardTitle className="text-gray-900">Your API Keys</CardTitle>
+          <CardDescription className="text-gray-500">
             Use these keys to authenticate API requests from external applications
           </CardDescription>
         </CardHeader>
@@ -244,35 +244,35 @@ export default function ApiKeysPage() {
           ) : keys.length > 0 ? (
             <Table>
               <TableHeader>
-                <TableRow className="border-gray-800">
-                  <TableHead className="text-gray-400">Name</TableHead>
-                  <TableHead className="text-gray-400">Key</TableHead>
-                  <TableHead className="text-gray-400">Status</TableHead>
-                  <TableHead className="text-gray-400">Last Used</TableHead>
-                  <TableHead className="text-gray-400">Created</TableHead>
-                  <TableHead className="text-gray-400 text-right">Actions</TableHead>
+                <TableRow className="border-gray-200">
+                  <TableHead className="text-gray-500">Name</TableHead>
+                  <TableHead className="text-gray-500">Key</TableHead>
+                  <TableHead className="text-gray-500">Status</TableHead>
+                  <TableHead className="text-gray-500">Last Used</TableHead>
+                  <TableHead className="text-gray-500">Created</TableHead>
+                  <TableHead className="text-gray-500 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {keys.map((key) => (
-                  <TableRow key={key.id} className="border-gray-800">
-                    <TableCell className="font-medium text-white">{key.name}</TableCell>
+                  <TableRow key={key.id} className="border-gray-200">
+                    <TableCell className="font-medium text-gray-900">{key.name}</TableCell>
                     <TableCell>
-                      <code className="text-gray-400 bg-gray-800 px-2 py-1 rounded text-sm">
+                      <code className="text-gray-600 bg-gray-100 px-2 py-1 rounded text-sm">
                         {key.key_prefix}...
                       </code>
                     </TableCell>
                     <TableCell>
-                      <Badge className={key.is_active ? "bg-green-600" : "bg-red-600"}>
+                      <Badge className={key.is_active ? "bg-emerald-500" : "bg-red-500"}>
                         {key.is_active ? "Active" : "Inactive"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-gray-400">
+                    <TableCell className="text-gray-500">
                       {key.last_used_at
                         ? new Date(key.last_used_at).toLocaleDateString()
                         : "Never"}
                     </TableCell>
-                    <TableCell className="text-gray-400">
+                    <TableCell className="text-gray-500">
                       {new Date(key.created_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-right">
@@ -280,7 +280,7 @@ export default function ApiKeysPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDelete(key.id)}
-                        className="text-red-400 hover:text-red-300"
+                        className="text-red-500 hover:text-red-600 hover:bg-red-50"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -291,9 +291,9 @@ export default function ApiKeysPage() {
             </Table>
           ) : (
             <div className="text-center py-12">
-              <Key className="h-12 w-12 mx-auto text-gray-600 mb-4" />
-              <h3 className="text-lg font-medium text-white mb-2">No API keys yet</h3>
-              <p className="text-gray-400 mb-4">
+              <Key className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No API keys yet</h3>
+              <p className="text-gray-500 mb-4">
                 Create an API key to integrate with external applications
               </p>
             </div>
@@ -301,21 +301,21 @@ export default function ApiKeysPage() {
         </CardContent>
       </Card>
 
-      <Card className="bg-gray-900 border-gray-800">
+      <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle className="text-white">API Usage</CardTitle>
+          <CardTitle className="text-gray-900">API Usage</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <h4 className="text-sm font-medium text-gray-200 mb-2">Get Video HLS URL</h4>
-            <pre className="bg-gray-800 p-4 rounded-lg text-sm text-gray-300 overflow-x-auto">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Get Video HLS URL</h4>
+            <pre className="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-x-auto">
 {`curl -X GET "https://unlimvideo.com/api/public/videos/{videoId}" \\
   -H "X-API-Key: uv_live_xxxxx"`}
             </pre>
           </div>
           <div>
-            <h4 className="text-sm font-medium text-gray-200 mb-2">Upload Video</h4>
-            <pre className="bg-gray-800 p-4 rounded-lg text-sm text-gray-300 overflow-x-auto">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Upload Video</h4>
+            <pre className="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-x-auto">
 {`curl -X POST "https://unlimvideo.com/api/public/videos" \\
   -H "X-API-Key: uv_live_xxxxx" \\
   -H "Content-Type: application/json" \\

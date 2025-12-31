@@ -38,7 +38,7 @@ export default function DashboardLayout({
   const isAdmin = profile?.role === "admin";
 
   return (
-    <div className="flex min-h-screen bg-gray-950">
+    <div className="flex min-h-screen bg-gray-50">
       <Sidebar isAdmin={isAdmin} />
       <div className="flex-1 flex flex-col">
         <Header

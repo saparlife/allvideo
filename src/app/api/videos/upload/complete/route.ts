@@ -6,9 +6,7 @@ import { r2Client, R2_BUCKET } from "@/lib/r2/client";
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const adminDb = await createAdminClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const db = adminDb as any;
+    const db = createAdminClient();
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
