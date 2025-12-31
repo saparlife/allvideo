@@ -6,15 +6,28 @@ import Hls from "hls.js";
 interface EmbedPlayerProps {
   src: string;
   poster?: string;
+  videoId: string;
 }
 
-export function EmbedPlayer({ src, poster }: EmbedPlayerProps) {
+export function EmbedPlayer({ src, poster, videoId }: EmbedPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
+  const viewTracked = useRef(false);
+
+  // Track view when video starts playing
+  const trackView = () => {
+    if (viewTracked.current) return;
+    viewTracked.current = true;
+
+    fetch(`/api/videos/${videoId}/view`, { method: "POST" }).catch(() => {});
+  };
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    // Track view on play
+    video.addEventListener("play", trackView);
 
     if (Hls.isSupported()) {
       const hls = new Hls({
@@ -44,12 +57,17 @@ export function EmbedPlayer({ src, poster }: EmbedPlayerProps) {
       hlsRef.current = hls;
 
       return () => {
+        video.removeEventListener("play", trackView);
         hls.destroy();
       };
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
     }
-  }, [src]);
+
+    return () => {
+      video.removeEventListener("play", trackView);
+    };
+  }, [src, videoId]);
 
   return (
     <video

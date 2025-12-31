@@ -64,25 +64,9 @@ export default async function EmbedPage({ params }: Props) {
     ? `${process.env.R2_PUBLIC_URL}/${video.thumbnail_key}`
     : undefined;
 
-  // Increment view count (fire and forget)
-  supabase
-    .from("videos")
-    .select("views_count")
-    .eq("id", id)
-    .single()
-    .then(({ data }) => {
-      if (data) {
-        supabase
-          .from("videos")
-          .update({ views_count: (data.views_count || 0) + 1 })
-          .eq("id", id)
-          .then(() => {});
-      }
-    });
-
   return (
     <div className="fixed inset-0 bg-black">
-      <EmbedPlayer src={hlsUrl} poster={thumbnailUrl} />
+      <EmbedPlayer src={hlsUrl} poster={thumbnailUrl} videoId={id} />
     </div>
   );
 }
