@@ -34,13 +34,16 @@ export async function GET(
       return apiError("Video not found", 404);
     }
 
+    const cdnUrl = process.env.R2_PUBLIC_URL || "https://cdn.lovsell.com";
+
     return Response.json({
       id: video.id,
       title: video.title,
       status: video.status,
       duration: video.duration_seconds,
-      thumbnail: video.thumbnail_url,
-      hls: video.hls_url,
+      thumbnail: video.thumbnail_key ? `${cdnUrl}/${video.thumbnail_key}` : null,
+      hls: video.hls_key ? `${cdnUrl}/${video.hls_key}` : null,
+      embed: `https://video.lovsell.com/embed/${video.id}`,
       createdAt: video.created_at,
     });
   } catch (error) {

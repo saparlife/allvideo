@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: videos, error } = await (supabase as any)
       .from("videos")
-      .select("id, title, status, duration_seconds, thumbnail_url, hls_url, created_at")
+      .select("id, title, status, duration_seconds, thumbnail_key, hls_key, created_at")
       .eq("user_id", auth.userId)
       .order("created_at", { ascending: false });
 
@@ -112,7 +112,20 @@ export async function GET(request: NextRequest) {
       return apiError("Failed to fetch videos", 500);
     }
 
-    return Response.json({ videos: videos || [] });
+    const cdnUrl = process.env.R2_PUBLIC_URL || "https://cdn.lovsell.com";
+
+    const formattedVideos = (videos || []).map((video: Record<string, unknown>) => ({
+      id: video.id,
+      title: video.title,
+      status: video.status,
+      duration: video.duration_seconds,
+      thumbnail: video.thumbnail_key ? `${cdnUrl}/${video.thumbnail_key}` : null,
+      hls: video.hls_key ? `${cdnUrl}/${video.hls_key}` : null,
+      embed: `https://video.lovsell.com/embed/${video.id}`,
+      createdAt: video.created_at,
+    }));
+
+    return Response.json({ videos: formattedVideos });
   } catch (error) {
     console.error("API error:", error);
     return apiError("Internal server error", 500);

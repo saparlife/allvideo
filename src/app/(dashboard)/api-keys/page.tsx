@@ -307,19 +307,33 @@ export default function ApiKeysPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Get Video HLS URL</h4>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">List All Videos</h4>
             <pre className="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-x-auto">
-{`curl -X GET "https://unlimvideo.com/api/public/videos/{videoId}" \\
-  -H "X-API-Key: uv_live_xxxxx"`}
+{`curl -X GET "https://video.lovsell.com/api/public/videos" \\
+  -H "X-API-Key: av_live_xxxxx"`}
+            </pre>
+          </div>
+          <div>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Get Video Details</h4>
+            <pre className="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-x-auto">
+{`curl -X GET "https://video.lovsell.com/api/public/videos/{videoId}" \\
+  -H "X-API-Key: av_live_xxxxx"`}
             </pre>
           </div>
           <div>
             <h4 className="text-sm font-medium text-gray-700 mb-2">Upload Video</h4>
             <pre className="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-x-auto">
-{`curl -X POST "https://unlimvideo.com/api/public/videos" \\
-  -H "X-API-Key: uv_live_xxxxx" \\
+{`curl -X POST "https://video.lovsell.com/api/public/videos" \\
+  -H "X-API-Key: av_live_xxxxx" \\
   -H "Content-Type: application/json" \\
   -d '{"title": "My Video", "filename": "video.mp4", "size": 10485760}'`}
+            </pre>
+          </div>
+          <div>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Delete Video</h4>
+            <pre className="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-x-auto">
+{`curl -X DELETE "https://video.lovsell.com/api/public/videos/{videoId}" \\
+  -H "X-API-Key: av_live_xxxxx"`}
             </pre>
           </div>
         </CardContent>
