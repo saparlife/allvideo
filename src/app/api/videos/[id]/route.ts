@@ -4,8 +4,8 @@ import { r2Client, R2_BUCKET } from "@/lib/r2/client";
 import {
   ListObjectsV2Command,
   DeleteObjectsCommand,
-  DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
+import type { Video } from "@/types/database";
 
 export async function DELETE(
   request: NextRequest,
@@ -24,16 +24,18 @@ export async function DELETE(
   }
 
   // Get video and verify ownership
-  const { data: video, error: fetchError } = await supabase
+  const { data, error: fetchError } = await supabase
     .from("videos")
     .select("*")
     .eq("id", id)
     .eq("user_id", user.id)
     .single();
 
-  if (fetchError || !video) {
+  if (fetchError || !data) {
     return NextResponse.json({ error: "Video not found" }, { status: 404 });
   }
+
+  const video = data as Video;
 
   try {
     const keysToDelete: string[] = [];
