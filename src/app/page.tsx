@@ -256,7 +256,7 @@ export default function Home() {
             <FeatureCard
               icon={Globe}
               title="Global CDN"
-              description="Powered by Cloudflare's edge network. Lightning-fast video delivery to viewers anywhere in the world."
+              description="Powered by enterprise edge network. Lightning-fast video delivery to viewers anywhere in the world."
               gradient="bg-gradient-to-br from-emerald-500 to-teal-500"
             />
             <FeatureCard
@@ -351,7 +351,7 @@ export default function Home() {
               <Link href="/pricing" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
                 Pricing
               </Link>
-              <a href="mailto:hello@unlimvideo.com" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+              <a href="mailto:hello@lovsell.com" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
                 Contact
               </a>
             </div>

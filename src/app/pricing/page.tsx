@@ -93,7 +93,7 @@ const faqs = [
   },
   {
     q: "Is bandwidth really unlimited?",
-    a: "Yes. We use Cloudflare R2 with free egress. Whether your videos get 1,000 or 1,000,000 views, you pay the same monthly price. No overage charges, ever."
+    a: "Yes. We use enterprise-grade CDN infrastructure with zero egress fees. Whether your videos get 1,000 or 1,000,000 views, you pay the same monthly price. No overage charges, ever."
   },
   {
     q: "How does this compare to Vimeo?",
@@ -219,7 +219,7 @@ export default function PricingPage() {
                 >
                   <Link href={
                     plan.name === "Enterprise"
-                      ? "mailto:hello@unlimvideo.com"
+                      ? "mailto:hello@lovsell.com"
                       : plan.name === "Free"
                         ? "/register"
                         : `/checkout?plan=${plan.name.toLowerCase()}`
@@ -251,7 +251,7 @@ export default function PricingPage() {
             Need a custom plan or have questions?
           </p>
           <Button asChild className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium">
-            <a href="mailto:hello@unlimvideo.com">Contact Sales</a>
+            <a href="mailto:hello@lovsell.com">Contact Sales</a>
           </Button>
         </div>
       </main>
@@ -270,7 +270,7 @@ export default function PricingPage() {
               <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
                 Home
               </Link>
-              <a href="mailto:hello@unlimvideo.com" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+              <a href="mailto:hello@lovsell.com" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
                 Contact
               </a>
             </div>

@@ -242,11 +242,11 @@ export default async function VideoDetailPage({ params }: Props) {
               <CardContent>
                 <div className="bg-gray-100 rounded-lg p-3">
                   <code className="text-xs text-gray-700 break-all">
-                    {`<iframe src="${process.env.NEXT_PUBLIC_APP_URL || 'https://unlimvideo.one'}/embed/${video.id}" width="640" height="360" frameborder="0" allowfullscreen></iframe>`}
+                    {`<iframe src="${process.env.NEXT_PUBLIC_APP_URL || 'https://video.lovsell.com'}/embed/${video.id}" width="640" height="360" frameborder="0" allowfullscreen></iframe>`}
                   </code>
                 </div>
                 <CopyButton
-                  text={`<iframe src="${process.env.NEXT_PUBLIC_APP_URL || 'https://unlimvideo.one'}/embed/${video.id}" width="640" height="360" frameborder="0" allowfullscreen></iframe>`}
+                  text={`<iframe src="${process.env.NEXT_PUBLIC_APP_URL || 'https://video.lovsell.com'}/embed/${video.id}" width="640" height="360" frameborder="0" allowfullscreen></iframe>`}
                   label="Copy Embed Code"
                 />
               </CardContent>
