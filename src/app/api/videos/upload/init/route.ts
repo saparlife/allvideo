@@ -32,7 +32,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Clean up old stuck uploads (older than 1 hour)
-    await db
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (db as any)
       .from("videos")
       .delete()
       .eq("user_id", user.id)
@@ -40,7 +41,8 @@ export async function POST(request: NextRequest) {
       .lt("created_at", new Date(Date.now() - 60 * 60 * 1000).toISOString());
 
     // Check storage limit
-    const { data: profile } = await db
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: profile } = await (db as any)
       .from("users")
       .select("storage_used_bytes, storage_limit_bytes")
       .eq("id", user.id)
@@ -57,7 +59,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Create video record
-    const { data: video, error: videoError } = await db
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: video, error: videoError } = await (db as any)
       .from("videos")
       .insert({
         user_id: user.id,
@@ -84,7 +87,8 @@ export async function POST(request: NextRequest) {
     console.log("Upload init: Generated key", originalKey);
 
     // Update video with original_key
-    await db
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (db as any)
       .from("videos")
       .update({ original_key: originalKey })
       .eq("id", video.id);
