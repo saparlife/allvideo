@@ -519,12 +519,12 @@ export default function VideoEditPage() {
                     <input
                       type="text"
                       readOnly
-                      value={`${CDN_URL}/${video.hls_key}/master.m3u8`}
+                      value={`${CDN_URL}/${video.hls_key}`}
                       className="flex-1 px-3 py-2 bg-gray-50 border rounded-lg text-sm text-gray-700 font-mono"
                     />
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(`${CDN_URL}/${video.hls_key}/master.m3u8`);
+                        navigator.clipboard.writeText(`${CDN_URL}/${video.hls_key}`);
                         toast.success("Copied!");
                       }}
                       className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition-colors cursor-pointer"

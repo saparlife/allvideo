@@ -52,7 +52,7 @@ export default async function EmbedPage({ params, searchParams }: Props) {
 
   const { data: video } = await supabase
     .from("videos")
-    .select("id, title, hls_key, thumbnail_key, status")
+    .select("id, title, hls_key, thumbnail_key, status, visibility")
     .eq("id", id)
     .eq("status", "ready")
     .single();
