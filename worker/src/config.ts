@@ -24,6 +24,8 @@ export const config = {
     { name: "480p", width: 854, height: 480, crf: 23, maxrate: "1500k", bufsize: "2250k" },
     { name: "720p", width: 1280, height: 720, crf: 23, maxrate: "3000k", bufsize: "4500k" },
     { name: "1080p", width: 1920, height: 1080, crf: 22, maxrate: "5000k", bufsize: "7500k" },
+    { name: "1440p", width: 2560, height: 1440, crf: 22, maxrate: "10000k", bufsize: "15000k" },  // 2K
+    { name: "2160p", width: 3840, height: 2160, crf: 22, maxrate: "20000k", bufsize: "30000k" },  // 4K
   ],
   encoding: {
     preset: "slow",        // slow = good compression, medium = faster, veryslow = best

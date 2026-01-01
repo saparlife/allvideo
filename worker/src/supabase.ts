@@ -134,3 +134,39 @@ export async function failJob(jobId: string, videoId: string, errorMessage: stri
     .update({ status: "failed" })
     .eq("id", videoId);
 }
+
+export async function clearOriginalKey(videoId: string): Promise<void> {
+  await supabase
+    .from("videos")
+    .update({ original_key: null })
+    .eq("id", videoId);
+}
+
+export async function saveTranscription(
+  videoId: string,
+  text: string,
+  vtt: string,
+  segments: any[],
+  language: string
+): Promise<void> {
+  await supabase
+    .from("videos")
+    .update({
+      transcript_text: text,
+      transcript_vtt: vtt,
+      transcript_segments: segments,
+      transcript_language: language,
+      transcription_status: "completed",
+    })
+    .eq("id", videoId);
+}
+
+export async function updateTranscriptionStatus(
+  videoId: string,
+  status: "pending" | "processing" | "completed" | "failed" | "skipped"
+): Promise<void> {
+  await supabase
+    .from("videos")
+    .update({ transcription_status: status })
+    .eq("id", videoId);
+}

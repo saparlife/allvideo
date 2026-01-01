@@ -3,6 +3,7 @@ import {
   GetObjectCommand,
   PutObjectCommand,
   HeadObjectCommand,
+  DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { config } from "./config";
 import * as fs from "fs";
@@ -103,4 +104,12 @@ export async function fileExists(key: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+export async function deleteFile(key: string): Promise<void> {
+  const command = new DeleteObjectCommand({
+    Bucket: config.r2.bucket,
+    Key: key,
+  });
+  await r2Client.send(command);
 }
