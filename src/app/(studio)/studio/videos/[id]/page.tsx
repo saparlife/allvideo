@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 
 const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.lovsell.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://video.lovsell.com";
 
 interface Category {
   id: string;
@@ -476,12 +477,12 @@ export default function VideoEditPage() {
                     <input
                       type="text"
                       readOnly
-                      value={`${typeof window !== "undefined" ? window.location.origin : ""}/embed/${video.id}`}
+                      value={`${SITE_URL}/embed/${video.id}`}
                       className="flex-1 px-3 py-2 bg-gray-50 border rounded-lg text-sm text-gray-700"
                     />
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(`${window.location.origin}/embed/${video.id}`);
+                        navigator.clipboard.writeText(`${SITE_URL}/embed/${video.id}`);
                         toast.success("Copied!");
                       }}
                       className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition-colors cursor-pointer"
@@ -497,12 +498,12 @@ export default function VideoEditPage() {
                     <textarea
                       readOnly
                       rows={3}
-                      value={`<iframe src="${typeof window !== "undefined" ? window.location.origin : ""}/embed/${video.id}" width="640" height="360" frameborder="0" allowfullscreen></iframe>`}
+                      value={`<iframe src="${SITE_URL}/embed/${video.id}" width="640" height="360" frameborder="0" allowfullscreen></iframe>`}
                       className="w-full px-3 py-2 bg-gray-50 border rounded-lg text-xs text-gray-700 font-mono resize-none"
                     />
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(`<iframe src="${window.location.origin}/embed/${video.id}" width="640" height="360" frameborder="0" allowfullscreen></iframe>`);
+                        navigator.clipboard.writeText(`<iframe src="${SITE_URL}/embed/${video.id}" width="640" height="360" frameborder="0" allowfullscreen></iframe>`);
                         toast.success("Copied!");
                       }}
                       className="absolute top-2 right-2 px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-xs transition-colors cursor-pointer"

@@ -54,12 +54,12 @@ const API_GROUPS: EndpointGroup[] = [
     "duration": 120,
     "thumbnail": "https://cdn.lovsell.com/...",
     "hls": "https://cdn.lovsell.com/.../master.m3u8",
-    "embed": "https://allvideo.one/embed/uuid",
+    "embed": "https://video.lovsell.com/embed/uuid",
     "createdAt": "2024-01-01T00:00:00Z"
   }]
 }`,
         example: {
-          request: `curl -X GET "https://allvideo.one/api/public/videos" \\
+          request: `curl -X GET "https://video.lovsell.com/api/public/videos" \\
   -H "X-API-Key: av_your_api_key"`,
           response: `{"videos": [{"id": "abc123", "title": "My Video", "status": "ready", ...}]}`
         }
@@ -79,7 +79,7 @@ const API_GROUPS: EndpointGroup[] = [
   "expiresIn": 3600
 }`,
         example: {
-          request: `curl -X POST "https://allvideo.one/api/public/videos" \\
+          request: `curl -X POST "https://video.lovsell.com/api/public/videos" \\
   -H "X-API-Key: av_your_api_key" \\
   -H "Content-Type: application/json" \\
   -d '{"title": "My Video", "filename": "video.mp4", "size": 104857600}'`,
@@ -97,7 +97,7 @@ const API_GROUPS: EndpointGroup[] = [
 }`,
         example: {
           request: `# After uploading to presigned URL:
-curl -X POST "https://allvideo.one/api/public/videos/abc123/complete" \\
+curl -X POST "https://video.lovsell.com/api/public/videos/abc123/complete" \\
   -H "X-API-Key: av_your_api_key"`,
           response: `{"id": "abc123", "status": "processing", "message": "Video queued for transcoding"}`
         }
@@ -113,11 +113,11 @@ curl -X POST "https://allvideo.one/api/public/videos/abc123/complete" \\
   "duration": 120,
   "thumbnail": "https://cdn.lovsell.com/...",
   "hls": "https://cdn.lovsell.com/.../master.m3u8",
-  "embed": "https://allvideo.one/embed/uuid",
+  "embed": "https://video.lovsell.com/embed/uuid",
   "createdAt": "2024-01-01T00:00:00Z"
 }`,
         example: {
-          request: `curl -X GET "https://allvideo.one/api/public/videos/abc123" \\
+          request: `curl -X GET "https://video.lovsell.com/api/public/videos/abc123" \\
   -H "X-API-Key: av_your_api_key"`,
           response: `{"id": "abc123", "title": "My Video", "status": "ready", "hls": "https://...", ...}`
         }
@@ -128,7 +128,7 @@ curl -X POST "https://allvideo.one/api/public/videos/abc123/complete" \\
         description: "Delete video and all associated files",
         response: `{"success": true}`,
         example: {
-          request: `curl -X DELETE "https://allvideo.one/api/public/videos/abc123" \\
+          request: `curl -X DELETE "https://video.lovsell.com/api/public/videos/abc123" \\
   -H "X-API-Key: av_your_api_key"`,
           response: `{"success": true}`
         }
@@ -171,7 +171,7 @@ curl -X POST "https://allvideo.one/api/public/videos/abc123/complete" \\
   "limit": 12
 }`,
         example: {
-          request: `curl "https://allvideo.one/api/videos/public?limit=10&sort=popular"`,
+          request: `curl "https://video.lovsell.com/api/videos/public?limit=10&sort=popular"`,
           response: `{"videos": [...], "hasMore": true, "page": 0, "limit": 10}`
         }
       },
@@ -199,7 +199,7 @@ curl -X POST "https://allvideo.one/api/public/videos/abc123/complete" \\
   "vtt": "WEBVTT\\n\\n1\\n00:00:00.000 --> 00:00:02.500\\nWelcome to..."
 }`,
         example: {
-          request: `curl "https://allvideo.one/api/videos/abc123/transcript"`,
+          request: `curl "https://video.lovsell.com/api/videos/abc123/transcript"`,
           response: `{
   "id": "abc123",
   "title": "My Video",
@@ -227,7 +227,7 @@ Welcome to...
 00:00:02.500 --> 00:00:05.000
 In this video...`,
         example: {
-          request: `curl "https://allvideo.one/api/videos/abc123/subtitles"`,
+          request: `curl "https://video.lovsell.com/api/videos/abc123/subtitles"`,
           response: `WEBVTT
 
 1
@@ -268,7 +268,7 @@ to this tutorial`
   }]
 }`,
         example: {
-          request: `curl "https://allvideo.one/api/videos/abc123/comments?sort=top"`,
+          request: `curl "https://video.lovsell.com/api/videos/abc123/comments?sort=top"`,
           response: `{"comments": [{"id": "...", "content": "Great video!", "likes_count": 5, ...}]}`
         }
       },
@@ -290,7 +290,7 @@ to this tutorial`
   }
 }`,
         example: {
-          request: `curl -X POST "https://allvideo.one/api/videos/abc123/comments" \\
+          request: `curl -X POST "https://video.lovsell.com/api/videos/abc123/comments" \\
   -H "Content-Type: application/json" \\
   -H "Cookie: sb-access-token=..." \\
   -d '{"content": "Great video!"}'`,
@@ -597,7 +597,7 @@ export function ApiPageClient({ initialKeys }: ApiPageClientProps) {
         <div className="p-6 border-b">
           <h2 className="text-lg font-semibold">API Reference</h2>
           <p className="text-sm text-gray-500 mt-1">
-            Base URL: <code className="bg-gray-100 px-2 py-0.5 rounded">https://allvideo.one</code>
+            Base URL: <code className="bg-gray-100 px-2 py-0.5 rounded">https://video.lovsell.com</code>
           </p>
         </div>
 
