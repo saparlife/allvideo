@@ -359,14 +359,11 @@ export function ApiPageClient({ initialKeys }: ApiPageClientProps) {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const methodColor = (method: string) => {
-    switch (method) {
-      case "GET": return "bg-emerald-500 text-white";
-      case "POST": return "bg-blue-500 text-white";
-      case "PATCH": return "bg-amber-500 text-white";
-      case "DELETE": return "bg-red-500 text-white";
-      default: return "bg-gray-500 text-white";
-    }
+  const methodStyles: Record<string, React.CSSProperties> = {
+    GET: { backgroundColor: "#10b981", color: "white" },
+    POST: { backgroundColor: "#3b82f6", color: "white" },
+    PATCH: { backgroundColor: "#f59e0b", color: "white" },
+    DELETE: { backgroundColor: "#ef4444", color: "white" },
   };
 
   const authBadge = (auth: string) => {
@@ -636,7 +633,10 @@ export function ApiPageClient({ initialKeys }: ApiPageClientProps) {
                         onClick={() => toggleEndpoint(endpointKey)}
                         className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 text-left"
                       >
-                        <span className={`px-2 py-1 text-xs font-bold rounded ${methodColor(endpoint.method)}`}>
+                        <span
+                          className="px-2 py-1 text-xs font-bold rounded"
+                          style={methodStyles[endpoint.method] || { backgroundColor: "#6b7280", color: "white" }}
+                        >
                           {endpoint.method}
                         </span>
                         <code className="text-sm font-mono flex-1">{endpoint.path}</code>
@@ -687,7 +687,10 @@ export function ApiPageClient({ initialKeys }: ApiPageClientProps) {
                           {/* Response */}
                           <div>
                             <h4 className="text-sm font-medium mb-2">Response</h4>
-                            <pre className="bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto">
+                            <pre
+                              className="p-3 rounded text-xs overflow-x-auto"
+                              style={{ backgroundColor: "#1f2937", color: "#f3f4f6" }}
+                            >
                               {endpoint.response}
                             </pre>
                           </div>
@@ -709,12 +712,18 @@ export function ApiPageClient({ initialKeys }: ApiPageClientProps) {
                                         <Copy className="w-3 h-3 text-gray-300" />
                                       )}
                                     </button>
-                                    <pre className="bg-gray-900 text-green-400 p-3 rounded text-xs overflow-x-auto">
+                                    <pre
+                                      className="p-3 rounded text-xs overflow-x-auto"
+                                      style={{ backgroundColor: "#1f2937", color: "#4ade80" }}
+                                    >
                                       {endpoint.example.request}
                                     </pre>
                                   </div>
                                 )}
-                                <pre className="bg-gray-800 text-blue-300 p-3 rounded text-xs overflow-x-auto">
+                                <pre
+                                  className="p-3 rounded text-xs overflow-x-auto"
+                                  style={{ backgroundColor: "#1e293b", color: "#93c5fd" }}
+                                >
                                   {endpoint.example.response}
                                 </pre>
                               </div>
