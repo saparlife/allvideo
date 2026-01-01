@@ -7,6 +7,83 @@ import {
 } from "@aws-sdk/client-s3";
 import type { Video } from "@/types/database";
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { data, error } = await (supabase as any)
+    .from("videos")
+    .select("*")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .single();
+
+  if (error || !data) {
+    return NextResponse.json({ error: "Video not found" }, { status: 404 });
+  }
+
+  return NextResponse.json({ video: data });
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+    const { title, description, visibility, tags, category_id, scheduled_at } = body;
+
+    const updates: Record<string, any> = {};
+    if (title !== undefined) updates.title = title;
+    if (description !== undefined) updates.description = description;
+    if (visibility !== undefined) updates.visibility = visibility;
+    if (tags !== undefined) updates.tags = tags;
+    if (category_id !== undefined) updates.category_id = category_id;
+    if (scheduled_at !== undefined) updates.scheduled_at = scheduled_at;
+
+    const { data, error } = await (supabase as any)
+      .from("videos")
+      .update(updates)
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .select("*")
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ video: data });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

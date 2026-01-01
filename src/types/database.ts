@@ -8,7 +8,7 @@ export type Json =
 
 export type UserRole = "user" | "admin";
 export type VideoStatus = "uploading" | "processing" | "ready" | "failed" | "deleted";
-export type TranscodeStatus = "pending" | "processing" | "completed" | "failed";
+export type TranscodeStatus = "pending" | "processing" | "ready" | "failed";
 export type SubscriptionTier = "free" | "starter" | "pro" | "business" | "scale" | "enterprise" | "enterprise_plus" | "ultimate";
 
 export interface Database {
@@ -104,6 +104,7 @@ export interface Database {
           id: string;
           user_id: string;
           title: string;
+          slug: string | null;
           description: string | null;
           original_key: string | null;
           original_size_bytes: number;
@@ -111,10 +112,13 @@ export interface Database {
           mime_type: string | null;
           hls_key: string | null;
           thumbnail_key: string | null;
+          thumbnail_url: string | null;
           duration_seconds: number | null;
+          duration: number | null;
           width: number | null;
           height: number | null;
           status: VideoStatus;
+          visibility: string;
           error_message: string | null;
           views_count: number;
           is_public: boolean;
@@ -125,6 +129,7 @@ export interface Database {
           id?: string;
           user_id: string;
           title: string;
+          slug?: string | null;
           description?: string | null;
           original_key?: string | null;
           original_size_bytes?: number;
@@ -132,10 +137,13 @@ export interface Database {
           mime_type?: string | null;
           hls_key?: string | null;
           thumbnail_key?: string | null;
+          thumbnail_url?: string | null;
           duration_seconds?: number | null;
+          duration?: number | null;
           width?: number | null;
           height?: number | null;
           status?: VideoStatus;
+          visibility?: string;
           error_message?: string | null;
           views_count?: number;
           is_public?: boolean;
@@ -146,6 +154,7 @@ export interface Database {
           id?: string;
           user_id?: string;
           title?: string;
+          slug?: string | null;
           description?: string | null;
           original_key?: string | null;
           original_size_bytes?: number;
@@ -153,10 +162,13 @@ export interface Database {
           mime_type?: string | null;
           hls_key?: string | null;
           thumbnail_key?: string | null;
+          thumbnail_url?: string | null;
           duration_seconds?: number | null;
+          duration?: number | null;
           width?: number | null;
           height?: number | null;
           status?: VideoStatus;
+          visibility?: string;
           error_message?: string | null;
           views_count?: number;
           is_public?: boolean;

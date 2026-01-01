@@ -1,15 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
 });
 
 export const viewport: Viewport = {
@@ -21,23 +23,19 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL("https://video.lovsell.com"),
   title: {
-    default: "UnlimVideo - Video Hosting with Unlimited Bandwidth",
+    default: "UnlimVideo - Watch and Share Videos",
     template: "%s | UnlimVideo",
   },
   description:
-    "Stop paying for video views. Video hosting with truly unlimited bandwidth. No overages, no surprises. Save up to 90% compared to Vimeo. Start free today.",
+    "Discover, watch, and share videos from creators around the world. Unlimited video hosting with no bandwidth limits.",
   keywords: [
     "video hosting",
-    "unlimited bandwidth",
-    "HLS streaming",
-    "video CDN",
-    "vimeo alternative",
     "video platform",
+    "watch videos",
+    "share videos",
     "video streaming",
-    "adaptive bitrate",
-    "video transcoding",
-    "embed video",
-    "video API",
+    "video upload",
+    "creator platform",
   ],
   authors: [{ name: "UnlimVideo" }],
   creator: "UnlimVideo",
@@ -58,55 +56,60 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://video.lovsell.com",
     siteName: "UnlimVideo",
-    title: "UnlimVideo - Video Hosting with Unlimited Bandwidth",
+    title: "UnlimVideo - Watch and Share Videos",
     description:
-      "Stop paying for video views. Video hosting with truly unlimited bandwidth. No overages, no surprises. Save up to 90% compared to Vimeo.",
+      "Discover, watch, and share videos from creators around the world. Unlimited video hosting with no bandwidth limits.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "UnlimVideo - Unlimited Video Hosting",
+        alt: "UnlimVideo - Video Platform",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "UnlimVideo - Video Hosting with Unlimited Bandwidth",
+    title: "UnlimVideo - Watch and Share Videos",
     description:
-      "Stop paying for video views. Unlimited bandwidth video hosting. Save up to 90% compared to Vimeo.",
+      "Discover, watch, and share videos from creators around the world.",
     images: ["/og-image.png"],
     creator: "@unlimvideo",
   },
   alternates: {
     canonical: "https://video.lovsell.com",
+    languages: {
+      en: "https://video.lovsell.com",
+      ru: "https://video.lovsell.com/ru",
+    },
   },
   icons: {
-    icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-    ],
-    apple: [
-      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
-    ],
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
   manifest: "/manifest.json",
   category: "technology",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <head>
         <link rel="preconnect" href="https://cdn.lovsell.com" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <NextIntlClientProvider messages={messages}>
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );

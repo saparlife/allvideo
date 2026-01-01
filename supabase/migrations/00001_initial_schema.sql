@@ -268,23 +268,13 @@ CREATE POLICY "Users can update own profile"
   ON public.users FOR UPDATE
   USING (auth.uid() = id);
 
-CREATE POLICY "Admins can view all users"
-  ON public.users FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.users
-      WHERE id = auth.uid() AND role = 'admin'
-    )
-  );
+-- Note: Admin policies removed to avoid infinite recursion
+-- Admin access should be handled via service role key or separate admin schema
 
-CREATE POLICY "Admins can update all users"
-  ON public.users FOR UPDATE
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.users
-      WHERE id = auth.uid() AND role = 'admin'
-    )
-  );
+-- Allow public to view basic user profiles (for channel pages)
+CREATE POLICY "Public can view user profiles"
+  ON public.users FOR SELECT
+  USING (true);
 
 -- Videos policies
 CREATE POLICY "Users can view own videos"

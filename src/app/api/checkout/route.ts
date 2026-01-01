@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
         street: body.billing?.street || "Unknown",
         zipcode: body.billing?.zipcode || "00000",
       },
-      return_url: process.env.NEXT_PUBLIC_APP_URL + "/dashboard?subscription=success",
+      return_url: process.env.NEXT_PUBLIC_APP_URL + "/studio?subscription=success",
       payment_link: true,
       metadata: body.metadata || {},
     });
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
         street: "Unknown",
         zipcode: "00000",
       },
-      return_url: process.env.NEXT_PUBLIC_APP_URL + "/dashboard?subscription=success",
+      return_url: process.env.NEXT_PUBLIC_APP_URL + "/studio?subscription=success",
       payment_link: true,
     });
 

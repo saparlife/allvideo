@@ -1,8 +1,7 @@
 import { ReactNode } from "react";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { Sidebar } from "@/components/layout/sidebar";
-import { Header } from "@/components/layout/header";
 import { Toaster } from "@/components/ui/sonner";
 import type { User } from "@/types/database";
 
@@ -28,24 +27,34 @@ export default async function AdminLayout({
 
   // Check if admin
   if (profile?.role !== "admin") {
-    redirect("/dashboard");
+    redirect("/studio");
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-950">
-      <Sidebar isAdmin={true} />
-      <div className="flex-1 flex flex-col">
-        <Header
-          user={{
-            email: user.email!,
-            name: profile?.name,
-            avatar_url: profile?.avatar_url,
-          }}
-        />
-        <main className="flex-1 p-6">
-          {children}
-        </main>
-      </div>
+    <div className="min-h-screen bg-gray-100">
+      {/* Admin Header */}
+      <header className="bg-red-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <Link href="/admin" className="font-bold text-lg">
+              Admin Panel
+            </Link>
+            <nav className="flex gap-4">
+              <Link href="/admin" className="hover:underline">Dashboard</Link>
+              <Link href="/admin/users" className="hover:underline">Users</Link>
+              <Link href="/admin/videos" className="hover:underline">Videos</Link>
+              <Link href="/admin/reports" className="hover:underline">Reports</Link>
+            </nav>
+          </div>
+          <Link href="/studio" className="text-sm hover:underline">
+            ← Back to Studio
+          </Link>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        {children}
+      </main>
       <Toaster />
     </div>
   );

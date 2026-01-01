@@ -33,17 +33,26 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const pathname = request.nextUrl.pathname;
+
+  // Remove locale prefix for route matching
+  const pathnameWithoutLocale = pathname.replace(/^\/(en|ru)/, "") || "/";
+
   const isAuthPage =
-    request.nextUrl.pathname.startsWith("/login") ||
-    request.nextUrl.pathname.startsWith("/register") ||
-    request.nextUrl.pathname.startsWith("/forgot-password");
+    pathnameWithoutLocale.startsWith("/login") ||
+    pathnameWithoutLocale.startsWith("/register") ||
+    pathnameWithoutLocale.startsWith("/forgot-password") ||
+    pathnameWithoutLocale.startsWith("/setup");
 
   const isPublicPage =
-    request.nextUrl.pathname === "/" ||
-    request.nextUrl.pathname.startsWith("/pricing") ||
-    request.nextUrl.pathname.startsWith("/docs") ||
-    request.nextUrl.pathname.startsWith("/embed") ||
-    request.nextUrl.pathname.startsWith("/api/public");
+    pathnameWithoutLocale === "/" ||
+    pathnameWithoutLocale.startsWith("/pricing") ||
+    pathnameWithoutLocale.startsWith("/docs") ||
+    pathnameWithoutLocale.startsWith("/embed") ||
+    pathnameWithoutLocale.startsWith("/watch") ||
+    pathnameWithoutLocale.startsWith("/channel") ||
+    pathnameWithoutLocale.startsWith("/search") ||
+    pathname.startsWith("/api/public");
 
   // Redirect unauthenticated users to login
   if (!user && !isAuthPage && !isPublicPage) {
@@ -55,7 +64,7 @@ export async function updateSession(request: NextRequest) {
   // Redirect authenticated users away from auth pages
   if (user && isAuthPage) {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = "/studio";
     return NextResponse.redirect(url);
   }
 
