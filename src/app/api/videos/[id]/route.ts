@@ -101,7 +101,7 @@ export async function DELETE(
   }
 
   // Get video and verify ownership
-  const { data, error: fetchError } = await supabase
+  const { data, error: fetchError } = await (supabase as any)
     .from("videos")
     .select("*")
     .eq("id", id)
@@ -166,7 +166,7 @@ export async function DELETE(
     }
 
     // 4. Delete from database (videos table - cascade will handle transcode_jobs)
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await (supabase as any)
       .from("videos")
       .delete()
       .eq("id", id)

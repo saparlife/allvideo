@@ -13,13 +13,13 @@ export async function POST(request: NextRequest) {
   }
 
   // Check if user is admin
-  const { data: profile } = await supabase
+  const { data: profile } = await (supabase as any)
     .from("users")
     .select("role")
     .eq("id", user.id)
     .single();
 
-  if (profile?.role !== "admin") {
+  if ((profile as any)?.role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case "dismiss":
         // Just mark report as dismissed
-        await supabase
+        await (supabase as any)
           .from("content_reports")
           .update({
             status: "dismissed",
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 
       case "reviewed":
         // Mark as reviewed but no action taken
-        await supabase
+        await (supabase as any)
           .from("content_reports")
           .update({
             status: "reviewed",
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Remove video (soft delete)
-        await supabase
+        await (supabase as any)
           .from("videos")
           .update({
             is_removed: true,
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
           .eq("id", content_id);
 
         // Update report
-        await supabase
+        await (supabase as any)
           .from("content_reports")
           .update({
             status: "action_taken",
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
           .eq("id", report_id);
 
         // Log admin action
-        await supabase.from("admin_actions").insert({
+        await (supabase as any).from("admin_actions").insert({
           admin_id: user.id,
           action_type: "remove_video",
           target_type: "video",
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Hide comment
-        await supabase
+        await (supabase as any)
           .from("comments")
           .update({
             is_hidden: true,
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
           .eq("id", content_id);
 
         // Update report
-        await supabase
+        await (supabase as any)
           .from("content_reports")
           .update({
             status: "action_taken",
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
           .eq("id", report_id);
 
         // Log admin action
-        await supabase.from("admin_actions").insert({
+        await (supabase as any).from("admin_actions").insert({
           admin_id: user.id,
           action_type: "hide_comment",
           target_type: "comment",
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Ban user
-        await supabase
+        await (supabase as any)
           .from("users")
           .update({
             is_banned: true,
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
           .eq("id", content_id);
 
         // Update report
-        await supabase
+        await (supabase as any)
           .from("content_reports")
           .update({
             status: "action_taken",
@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
           .eq("id", report_id);
 
         // Log admin action
-        await supabase.from("admin_actions").insert({
+        await (supabase as any).from("admin_actions").insert({
           admin_id: user.id,
           action_type: "ban_user",
           target_type: "user",

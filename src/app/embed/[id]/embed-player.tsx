@@ -1,87 +1,65 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import Hls from "hls.js";
+import { useRef } from "react";
+import {
+  MediaPlayer,
+  MediaProvider,
+  Poster,
+  type MediaPlayerInstance,
+} from "@vidstack/react";
+import {
+  DefaultVideoLayout,
+  defaultLayoutIcons,
+} from "@vidstack/react/player/layouts/default";
+import "@vidstack/react/player/styles/default/theme.css";
+import "@vidstack/react/player/styles/default/layouts/video.css";
 
 interface EmbedPlayerProps {
   src: string;
   poster?: string;
   videoId: string;
+  title?: string;
 }
 
-export function EmbedPlayer({ src, poster, videoId }: EmbedPlayerProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const hlsRef = useRef<Hls | null>(null);
+export function EmbedPlayer({ src, poster, videoId, title }: EmbedPlayerProps) {
+  const playerRef = useRef<MediaPlayerInstance>(null);
   const viewTracked = useRef(false);
 
-  // Track view when video starts playing
-  const trackView = () => {
+  const trackView = async () => {
     if (viewTracked.current) return;
     viewTracked.current = true;
-
-    fetch(`/api/videos/${videoId}/view`, { method: "POST" }).catch(() => {});
+    try {
+      await fetch(`/api/videos/${videoId}/view`, { method: "POST" });
+    } catch (e) {
+      // Ignore errors
+    }
   };
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    // Track view on play
-    video.addEventListener("play", trackView);
-
-    if (Hls.isSupported()) {
-      const hls = new Hls({
-        enableWorker: true,
-        lowLatencyMode: true,
-      });
-
-      hls.loadSource(src);
-      hls.attachMedia(video);
-
-      hls.on(Hls.Events.ERROR, (_, data) => {
-        if (data.fatal) {
-          switch (data.type) {
-            case Hls.ErrorTypes.NETWORK_ERROR:
-              hls.startLoad();
-              break;
-            case Hls.ErrorTypes.MEDIA_ERROR:
-              hls.recoverMediaError();
-              break;
-            default:
-              hls.destroy();
-              break;
-          }
-        }
-      });
-
-      hlsRef.current = hls;
-
-      return () => {
-        video.removeEventListener("play", trackView);
-        hls.destroy();
-      };
-    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = src;
-    }
-
-    return () => {
-      video.removeEventListener("play", trackView);
-    };
-  }, [src, videoId]);
-
   return (
-    <video
-      ref={videoRef}
-      style={{
-        width: "100%",
-        height: "100%",
-        objectFit: "contain",
-        background: "#000",
-      }}
-      controls
-      poster={poster}
+    <MediaPlayer
+      ref={playerRef}
+      src={src}
+      viewType="video"
+      streamType="on-demand"
+      logLevel="warn"
+      crossOrigin
       playsInline
       autoPlay
-    />
+      title={title}
+      onPlay={trackView}
+      className="w-full h-full"
+    >
+      <MediaProvider>
+        {poster && (
+          <Poster
+            className="absolute inset-0 block h-full w-full object-cover opacity-0 transition-opacity data-[visible]:opacity-100"
+            src={poster}
+            alt={title || "Video"}
+          />
+        )}
+      </MediaProvider>
+
+      <DefaultVideoLayout icons={defaultLayoutIcons} />
+    </MediaPlayer>
   );
 }

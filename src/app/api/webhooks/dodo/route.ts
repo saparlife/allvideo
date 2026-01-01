@@ -137,7 +137,7 @@ async function handleSubscriptionActive(data: {
 
   if (!userId && data.customer?.email) {
     // Find user by email
-    const { data: user } = await supabaseAdmin
+    const { data: user } = await (supabaseAdmin as any)
       .from("users")
       .select("id")
       .eq("email", data.customer.email)
@@ -166,7 +166,7 @@ async function handleSubscriptionActive(data: {
   const tier = tierMap[planName] || "starter";
 
   // Update user's storage limit
-  const { error: userError } = await supabaseAdmin
+  const { error: userError } = await (supabaseAdmin as any)
     .from("users")
     .update({
       storage_limit_bytes: storageLimitBytes,
@@ -193,14 +193,14 @@ async function handleSubscriptionActive(data: {
   };
 
   // First, deactivate any existing subscriptions
-  await supabaseAdmin
+  await (supabaseAdmin as any)
     .from("subscriptions")
     .update({ is_active: false, updated_at: new Date().toISOString() })
     .eq("user_id", userId)
     .eq("is_active", true);
 
   // Create new subscription
-  const { error: subError } = await supabaseAdmin
+  const { error: subError } = await (supabaseAdmin as any)
     .from("subscriptions")
     .insert(subscriptionData);
 
@@ -221,7 +221,7 @@ async function handleSubscriptionCancelled(data: {
   let userId = data.metadata?.user_id;
 
   if (!userId && data.customer?.email) {
-    const { data: user } = await supabaseAdmin
+    const { data: user } = await (supabaseAdmin as any)
       .from("users")
       .select("id")
       .eq("email", data.customer.email)
@@ -243,7 +243,7 @@ async function handleSubscriptionCancelled(data: {
 
   // Mark subscription as cancelled with grace period
   // Don't revert limits yet - they keep access for 30 days
-  const { error: subError } = await supabaseAdmin
+  const { error: subError } = await (supabaseAdmin as any)
     .from("subscriptions")
     .update({
       is_active: false,

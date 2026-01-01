@@ -1,7 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
-import Hls from "hls.js";
+import { useRef, useState, useCallback } from "react";
+import {
+  MediaPlayer,
+  MediaProvider,
+  Poster,
+  type MediaPlayerInstance,
+} from "@vidstack/react";
+import {
+  DefaultVideoLayout,
+  defaultLayoutIcons,
+} from "@vidstack/react/player/layouts/default";
+import "@vidstack/react/player/styles/default/theme.css";
+import "@vidstack/react/player/styles/default/layouts/video.css";
 import { ChevronLeft, ChevronRight, List, X, Play } from "lucide-react";
 
 interface VideoItem {
@@ -37,8 +48,7 @@ export function PlaylistEmbedPlayer({
   videos,
   startIndex = 0,
 }: PlaylistEmbedPlayerProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const hlsRef = useRef<Hls | null>(null);
+  const playerRef = useRef<MediaPlayerInstance>(null);
   const viewTrackedRef = useRef<Set<string>>(new Set());
 
   const [currentIndex, setCurrentIndex] = useState(startIndex);
@@ -52,84 +62,6 @@ export function PlaylistEmbedPlayer({
     if (viewTrackedRef.current.has(videoId)) return;
     viewTrackedRef.current.add(videoId);
     fetch(`/api/videos/${videoId}/view`, { method: "POST" }).catch(() => {});
-  }, []);
-
-  // Load video
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !currentVideo) return;
-
-    const onPlay = () => {
-      setIsPlaying(true);
-      trackView(currentVideo.id);
-    };
-    const onPause = () => setIsPlaying(false);
-    const onEnded = () => {
-      // Auto-play next video
-      if (currentIndex < videos.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-      }
-    };
-
-    video.addEventListener("play", onPlay);
-    video.addEventListener("pause", onPause);
-    video.addEventListener("ended", onEnded);
-
-    // Destroy existing HLS instance
-    if (hlsRef.current) {
-      hlsRef.current.destroy();
-      hlsRef.current = null;
-    }
-
-    if (Hls.isSupported()) {
-      const hls = new Hls({
-        enableWorker: true,
-        lowLatencyMode: true,
-      });
-
-      hls.loadSource(currentVideo.hlsUrl);
-      hls.attachMedia(video);
-
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        video.play().catch(() => {});
-      });
-
-      hls.on(Hls.Events.ERROR, (_, data) => {
-        if (data.fatal) {
-          switch (data.type) {
-            case Hls.ErrorTypes.NETWORK_ERROR:
-              hls.startLoad();
-              break;
-            case Hls.ErrorTypes.MEDIA_ERROR:
-              hls.recoverMediaError();
-              break;
-            default:
-              hls.destroy();
-              break;
-          }
-        }
-      });
-
-      hlsRef.current = hls;
-    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = currentVideo.hlsUrl;
-      video.play().catch(() => {});
-    }
-
-    return () => {
-      video.removeEventListener("play", onPlay);
-      video.removeEventListener("pause", onPause);
-      video.removeEventListener("ended", onEnded);
-    };
-  }, [currentVideo, currentIndex, videos.length, trackView]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-      }
-    };
   }, []);
 
   const goToPrevious = () => {
@@ -149,6 +81,20 @@ export function PlaylistEmbedPlayer({
     setShowPlaylist(false);
   };
 
+  const handlePlay = () => {
+    setIsPlaying(true);
+    if (currentVideo) {
+      trackView(currentVideo.id);
+    }
+  };
+
+  const handleEnded = () => {
+    // Auto-play next video
+    if (currentIndex < videos.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
+  };
+
   if (!currentVideo) {
     return (
       <div className="flex items-center justify-center h-full text-white">
@@ -161,21 +107,37 @@ export function PlaylistEmbedPlayer({
     <div className="relative w-full h-full bg-black flex">
       {/* Video Player */}
       <div className={`relative flex-1 ${showPlaylist ? "hidden sm:block" : ""}`}>
-        <video
-          ref={videoRef}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-            background: "#000",
-          }}
-          controls
-          poster={currentVideo.thumbnail}
+        <MediaPlayer
+          ref={playerRef}
+          key={currentVideo.id}
+          src={currentVideo.hlsUrl}
+          viewType="video"
+          streamType="on-demand"
+          logLevel="warn"
+          crossOrigin
           playsInline
-        />
+          autoPlay
+          title={currentVideo.title}
+          onPlay={handlePlay}
+          onPause={() => setIsPlaying(false)}
+          onEnded={handleEnded}
+          className="w-full h-full"
+        >
+          <MediaProvider>
+            {currentVideo.thumbnail && (
+              <Poster
+                className="absolute inset-0 block h-full w-full object-cover opacity-0 transition-opacity data-[visible]:opacity-100"
+                src={currentVideo.thumbnail}
+                alt={currentVideo.title}
+              />
+            )}
+          </MediaProvider>
+
+          <DefaultVideoLayout icons={defaultLayoutIcons} />
+        </MediaPlayer>
 
         {/* Top bar with playlist info */}
-        <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/80 to-transparent p-3 pointer-events-none">
+        <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/80 to-transparent p-3 pointer-events-none z-10">
           <div className="flex items-center gap-2 text-white text-sm">
             <span className="font-medium truncate">{playlistTitle}</span>
             <span className="opacity-70">•</span>
@@ -185,7 +147,7 @@ export function PlaylistEmbedPlayer({
         </div>
 
         {/* Navigation controls */}
-        <div className="absolute bottom-16 left-2 right-2 flex items-center justify-between pointer-events-none">
+        <div className="absolute bottom-16 left-2 right-2 flex items-center justify-between pointer-events-none z-10">
           <button
             onClick={goToPrevious}
             disabled={currentIndex === 0}
@@ -205,7 +167,7 @@ export function PlaylistEmbedPlayer({
         {/* Playlist toggle button */}
         <button
           onClick={() => setShowPlaylist(!showPlaylist)}
-          className="absolute top-3 right-3 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded flex items-center justify-center transition-colors"
+          className="absolute top-3 right-3 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded flex items-center justify-center transition-colors z-20"
         >
           <List className="w-4 h-4" />
         </button>
@@ -213,7 +175,7 @@ export function PlaylistEmbedPlayer({
 
       {/* Playlist sidebar */}
       {showPlaylist && (
-        <div className="absolute sm:relative inset-0 sm:inset-auto sm:w-72 bg-gray-900 flex flex-col z-10">
+        <div className="absolute sm:relative inset-0 sm:inset-auto sm:w-72 bg-gray-900 flex flex-col z-30">
           <div className="flex items-center justify-between p-3 border-b border-gray-800">
             <div>
               <h3 className="font-medium text-white text-sm truncate">{playlistTitle}</h3>

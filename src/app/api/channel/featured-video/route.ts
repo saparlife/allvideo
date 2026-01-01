@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     // If video_id is provided, verify it belongs to the user and is ready
     if (video_id) {
-      const { data: video, error: videoError } = await supabase
+      const { data: video, error: videoError } = await (supabase as any)
         .from("videos")
         .select("id")
         .eq("id", video_id)
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update user's featured video
-    const { error: updateError } = await supabase
+    const { error: updateError } = await (supabase as any)
       .from("users")
       .update({ featured_video_id: video_id || null })
       .eq("id", user.id);
@@ -71,7 +71,7 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data: userData, error } = await supabase
+  const { data: userData, error } = await (supabase as any)
     .from("users")
     .select("featured_video_id")
     .eq("id", user.id)

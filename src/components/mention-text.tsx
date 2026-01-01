@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ReactNode } from "react";
 
 interface MentionTextProps {
   text: string;
@@ -12,7 +13,7 @@ export function MentionText({ text, className = "" }: MentionTextProps) {
   // Regex to match @username (alphanumeric and underscores)
   const mentionRegex = /@([a-zA-Z0-9_]+)/g;
 
-  const parts: (string | JSX.Element)[] = [];
+  const parts: ReactNode[] = [];
   let lastIndex = 0;
   let match;
 

@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 
     // Find all subscriptions with expired grace period
     // (is_active = false AND expires_at < now)
-    const { data: expiredSubscriptions, error: subError } = await supabaseAdmin
+    const { data: expiredSubscriptions, error: subError } = await (supabaseAdmin as any)
       .from("subscriptions")
       .select("user_id")
       .eq("is_active", false)
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
       const userId = sub.user_id;
 
       // Check if user is already on free tier (already processed)
-      const { data: existingFreeSub } = await supabaseAdmin
+      const { data: existingFreeSub } = await (supabaseAdmin as any)
         .from("subscriptions")
         .select("id")
         .eq("user_id", userId)
@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
       console.log(`Processing expired subscription for user: ${userId}`);
 
       // Get all videos for this user
-      const { data: videos, error: videosError } = await supabaseAdmin
+      const { data: videos, error: videosError } = await (supabaseAdmin as any)
         .from("videos")
         .select("id, original_key, hls_key, thumbnail_key")
         .eq("user_id", userId);
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Delete video records from database
-        const { error: deleteError } = await supabaseAdmin
+        const { error: deleteError } = await (supabaseAdmin as any)
           .from("videos")
           .delete()
           .eq("user_id", userId);
@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
       }
 
       // Reset user to free tier limits
-      await supabaseAdmin
+      await (supabaseAdmin as any)
         .from("users")
         .update({
           storage_limit_bytes: 10 * 1024 * 1024 * 1024, // 10GB free
@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
         .eq("id", userId);
 
       // Delete the expired subscription record
-      await supabaseAdmin
+      await (supabaseAdmin as any)
         .from("subscriptions")
         .delete()
         .eq("user_id", userId)
