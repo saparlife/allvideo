@@ -176,7 +176,9 @@
     "watchTime": "Watch time",
     "newSubscribers": "New subscribers",
     "topVideos": "Top videos",
-    "recentComments": "Recent comments"
+    "recentComments": "Recent comments",
+    "live": "Live",
+    "api": "API"
   },
   "auth": {
     "signIn": "Sign in",

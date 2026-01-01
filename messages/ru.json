@@ -176,7 +176,9 @@
     "watchTime": "Время просмотра",
     "newSubscribers": "Новые подписчики",
     "topVideos": "Топ видео",
-    "recentComments": "Последние комментарии"
+    "recentComments": "Последние комментарии",
+    "live": "Трансляции",
+    "api": "API"
   },
   "auth": {
     "signIn": "Вход",
