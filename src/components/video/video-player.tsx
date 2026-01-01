@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import {
   MediaPlayer,
   MediaProvider,
   Poster,
   Track,
-  useMediaState,
   type MediaPlayerInstance,
 } from "@vidstack/react";
 import {
@@ -27,29 +26,117 @@ interface VideoPlayerProps {
   autoPlay?: boolean;
 }
 
-// Watermark overlay component
-function WatermarkOverlay({ text }: { text: string }) {
+// Canvas-based watermark - harder to remove than CSS
+function CanvasWatermark({ text }: { text: string }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const positionRef = useRef({ x: 0, y: 0 });
+  const animationRef = useRef<number | undefined>(undefined);
+
+  const draw = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !text) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Match canvas size to container
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+
+    // Clear canvas
+    ctx.clearRect(0, 0, rect.width, rect.height);
+
+    // Configure text style
+    ctx.font = "14px monospace";
+    ctx.textBaseline = "middle";
+
+    // Draw multiple watermarks in a grid pattern with rotation
+    ctx.save();
+    ctx.globalAlpha = 0.15;
+    ctx.fillStyle = "#ffffff";
+
+    // Diagonal pattern across entire canvas
+    const stepX = 200;
+    const stepY = 120;
+
+    for (let y = -50; y < rect.height + 100; y += stepY) {
+      for (let x = -100; x < rect.width + 200; x += stepX) {
+        ctx.save();
+        ctx.translate(x + positionRef.current.x, y + positionRef.current.y);
+        ctx.rotate(-25 * Math.PI / 180);
+        ctx.fillText(text, 0, 0);
+        ctx.restore();
+      }
+    }
+    ctx.restore();
+
+    // Draw corner watermarks (more visible)
+    ctx.globalAlpha = 0.25;
+    ctx.fillStyle = "#ffffff";
+
+    // Top-left
+    ctx.fillText(text, 12, 20);
+
+    // Top-right
+    const textWidth = ctx.measureText(text).width;
+    ctx.fillText(text, rect.width - textWidth - 12, 20);
+
+    // Bottom-left (above controls)
+    ctx.fillText(text, 12, rect.height - 60);
+
+    // Bottom-right (above controls)
+    ctx.fillText(text, rect.width - textWidth - 12, rect.height - 60);
+
+    // Moving center watermark
+    ctx.globalAlpha = 0.12;
+    ctx.font = "18px monospace";
+    ctx.save();
+    const centerX = rect.width / 2 + Math.sin(Date.now() / 3000) * 50;
+    const centerY = rect.height / 2 + Math.cos(Date.now() / 4000) * 30;
+    ctx.translate(centerX, centerY);
+    ctx.rotate(-30 * Math.PI / 180);
+    const largeTextWidth = ctx.measureText(text).width;
+    ctx.fillText(text, -largeTextWidth / 2, 0);
+    ctx.restore();
+
+  }, [text]);
+
+  useEffect(() => {
+    if (!text) return;
+
+    // Slowly move the pattern
+    const animate = () => {
+      positionRef.current.x = Math.sin(Date.now() / 10000) * 20;
+      positionRef.current.y = Math.cos(Date.now() / 12000) * 15;
+      draw();
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    // Handle resize
+    const handleResize = () => draw();
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [text, draw]);
+
   if (!text) return null;
 
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {/* Multiple watermarks across the video */}
-      <div className="absolute top-4 left-4 text-white/20 text-sm font-mono select-none">
-        {text}
-      </div>
-      <div className="absolute top-4 right-4 text-white/20 text-sm font-mono select-none">
-        {text}
-      </div>
-      <div className="absolute bottom-16 left-4 text-white/20 text-sm font-mono select-none">
-        {text}
-      </div>
-      <div className="absolute bottom-16 right-4 text-white/20 text-sm font-mono select-none">
-        {text}
-      </div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/10 text-lg font-mono select-none rotate-[-30deg]">
-        {text}
-      </div>
-    </div>
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none z-10"
+      style={{ mixBlendMode: "difference" }}
+    />
   );
 }
 
@@ -110,13 +197,13 @@ export function VideoPlayer({
         />
       </MediaPlayer>
 
-      {/* Watermark overlay */}
-      {watermark && <WatermarkOverlay text={watermark} />}
+      {/* Canvas watermark - harder to remove */}
+      {watermark && <CanvasWatermark text={watermark} />}
     </div>
   );
 }
 
-// Minimal player for embeds
+// Minimal player for embeds with canvas watermark
 export function EmbedPlayer({
   src,
   poster,
@@ -154,7 +241,8 @@ export function EmbedPlayer({
         <DefaultVideoLayout icons={defaultLayoutIcons} />
       </MediaPlayer>
 
-      {watermark && <WatermarkOverlay text={watermark} />}
+      {/* Canvas watermark */}
+      {watermark && <CanvasWatermark text={watermark} />}
     </div>
   );
 }

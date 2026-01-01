@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 
 interface Props {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ wm?: string }>;
 }
 
 // Create a public Supabase client (no auth required for embed)
@@ -44,8 +45,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function EmbedPage({ params }: Props) {
+export default async function EmbedPage({ params, searchParams }: Props) {
   const { id } = await params;
+  const { wm } = await searchParams;
   const supabase = getPublicClient();
 
   const { data: video } = await supabase
@@ -64,9 +66,18 @@ export default async function EmbedPage({ params }: Props) {
     ? `${process.env.R2_PUBLIC_URL}/${video.thumbnail_key}`
     : undefined;
 
+  // Decode watermark if provided (URL encoded)
+  const watermark = wm ? decodeURIComponent(wm) : undefined;
+
   return (
     <div className="fixed inset-0 bg-black">
-      <EmbedPlayer src={hlsUrl} poster={thumbnailUrl} videoId={id} />
+      <EmbedPlayer
+        src={hlsUrl}
+        poster={thumbnailUrl}
+        videoId={id}
+        title={video.title}
+        watermark={watermark}
+      />
     </div>
   );
 }
