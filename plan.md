@@ -10,12 +10,15 @@
 - [x] Commit: "Rebrand to 1stream.dev"
 
 ## Phase 2: Unified API Structure
-- [ ] Create unified media table schema
-- [ ] Add custom_metadata JSONB field (for companyId, userId, etc.)
-- [ ] Create /api/v1/upload universal endpoint
-- [ ] Auto-detect file type (video/image/audio/file)
-- [ ] Refactor existing video endpoints to /api/v1/videos
-- [ ] Commit: "Add unified API structure with custom metadata"
+- [x] Create unified media table schema (migration 00003)
+- [x] Add custom_metadata JSONB field (for companyId, userId, etc.)
+- [x] Add media_type field for future types
+- [x] Create /api/v1/upload universal endpoint
+- [x] Auto-detect file type (video/image/audio/file)
+- [x] Create /api/v1/videos endpoints (POST, GET, PATCH, DELETE)
+- [x] Create /api/v1/media listing with metadata filtering
+- [x] Support Bearer token auth (in addition to X-API-Key)
+- [x] Commit: "Add unified API structure with custom metadata"
 
 ## Phase 3: Image Processing
 - [ ] Add Sharp.js to worker dependencies

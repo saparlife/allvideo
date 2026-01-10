@@ -11,7 +11,15 @@ export interface ApiKeyAuth {
 }
 
 export async function verifyApiKey(request: Request): Promise<ApiKeyAuth | null> {
-  const apiKey = request.headers.get("X-API-Key");
+  // Support both X-API-Key header and Bearer token
+  let apiKey = request.headers.get("X-API-Key");
+
+  if (!apiKey) {
+    const authHeader = request.headers.get("Authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      apiKey = authHeader.slice(7);
+    }
+  }
 
   if (!apiKey) {
     return null;
@@ -53,4 +61,8 @@ export async function verifyApiKey(request: Request): Promise<ApiKeyAuth | null>
 
 export function apiError(message: string, status: number = 400) {
   return Response.json({ error: message }, { status });
+}
+
+export function apiSuccess(data: Record<string, unknown>, status: number = 200) {
+  return Response.json(data, { status });
 }
