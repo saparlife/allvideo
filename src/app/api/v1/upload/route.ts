@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { r2Client, R2_BUCKET } from "@/lib/r2/client";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { validateFile, type SubscriptionTier } from "@/lib/validation/file";
 
 // Detect media type from mime type
 function detectMediaType(mimeType: string): "video" | "image" | "audio" | "file" {
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = createAdminClient();
 
-    // Check user storage limit
+    // Get user with subscription tier
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: user, error: userError } = await (supabase as any)
       .from("users")
@@ -60,6 +61,25 @@ export async function POST(request: NextRequest) {
       return apiError("User not found", 404);
     }
 
+    // Get subscription tier
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: subscription } = await (supabase as any)
+      .from("subscriptions")
+      .select("tier")
+      .eq("user_id", auth.userId)
+      .eq("is_active", true)
+      .single();
+
+    const tier = (subscription?.tier || "free") as SubscriptionTier;
+
+    // Validate file (size limit and sanitize filename)
+    const validation = validateFile(filename, size, tier);
+    if (!validation.valid) {
+      return apiError(validation.error!, 400);
+    }
+    const sanitizedFilename = validation.sanitizedFilename!;
+
+    // Check storage limit
     if (user.storage_used_bytes + size > user.storage_limit_bytes) {
       return apiError("Storage limit exceeded. Upgrade your plan for more storage.", 403);
     }
@@ -70,8 +90,8 @@ export async function POST(request: NextRequest) {
       .from("videos")
       .insert({
         user_id: auth.userId,
-        title: title || filename,
-        original_filename: filename,
+        title: title || sanitizedFilename,
+        original_filename: sanitizedFilename,
         original_size_bytes: size,
         mime_type: detectedMimeType,
         media_type: mediaType,
@@ -87,7 +107,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate presigned URL for upload
-    const key = `users/${auth.userId}/originals/${media.id}/${filename}`;
+    const key = `users/${auth.userId}/originals/${media.id}/${sanitizedFilename}`;
     const command = new PutObjectCommand({
       Bucket: R2_BUCKET,
       Key: key,

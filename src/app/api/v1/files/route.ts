@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { r2Client, R2_BUCKET, R2_PUBLIC_URL } from "@/lib/r2/client";
 import { PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { validateFile, type SubscriptionTier } from "@/lib/validation/file";
 
 /**
  * POST /api/v1/files
@@ -42,6 +43,17 @@ export async function POST(request: NextRequest) {
       return apiError("User not found", 404);
     }
 
+    // Get subscription tier
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: subscription } = await (supabase as any)
+      .from("subscriptions")
+      .select("tier")
+      .eq("user_id", auth.userId)
+      .eq("is_active", true)
+      .single();
+
+    const tier = (subscription?.tier || "free") as SubscriptionTier;
+
     // Handle multipart (direct upload)
     if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
@@ -52,6 +64,13 @@ export async function POST(request: NextRequest) {
       if (!file) {
         return apiError("No file provided", 400);
       }
+
+      // Validate file
+      const validation = validateFile(file.name, file.size, tier);
+      if (!validation.valid) {
+        return apiError(validation.error!, 400);
+      }
+      const safeName = validation.sanitizedFilename!;
 
       if (user.storage_used_bytes + file.size > user.storage_limit_bytes) {
         return apiError("Storage limit exceeded", 403);
@@ -66,8 +85,8 @@ export async function POST(request: NextRequest) {
         .from("videos")
         .insert({
           user_id: auth.userId,
-          title: title || file.name,
-          original_filename: file.name,
+          title: title || safeName,
+          original_filename: safeName,
           original_size_bytes: file.size,
           mime_type: file.type || "application/octet-stream",
           media_type: "file",
@@ -83,7 +102,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Upload to R2
-      const key = `users/${auth.userId}/files/${fileRecord.id}/${file.name}`;
+      const key = `users/${auth.userId}/files/${fileRecord.id}/${safeName}`;
       await r2Client.send(
         new PutObjectCommand({
           Bucket: R2_BUCKET,
@@ -139,11 +158,18 @@ export async function POST(request: NextRequest) {
       return apiError("Missing required fields: filename, size", 400);
     }
 
+    // Validate file
+    const validation = validateFile(filename, size, tier);
+    if (!validation.valid) {
+      return apiError(validation.error!, 400);
+    }
+    const safeName = validation.sanitizedFilename!;
+
     if (user.storage_used_bytes + size > user.storage_limit_bytes) {
       return apiError("Storage limit exceeded", 403);
     }
 
-    const mimeType = guessMimeType(filename);
+    const mimeType = guessMimeType(safeName);
 
     // Create record
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -151,8 +177,8 @@ export async function POST(request: NextRequest) {
       .from("videos")
       .insert({
         user_id: auth.userId,
-        title: title || filename,
-        original_filename: filename,
+        title: title || safeName,
+        original_filename: safeName,
         original_size_bytes: size,
         mime_type: mimeType,
         media_type: "file",
@@ -168,7 +194,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate presigned upload URL
-    const key = `users/${auth.userId}/files/${fileRecord.id}/${filename}`;
+    const key = `users/${auth.userId}/files/${fileRecord.id}/${safeName}`;
     const command = new PutObjectCommand({
       Bucket: R2_BUCKET,
       Key: key,

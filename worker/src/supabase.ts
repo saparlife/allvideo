@@ -134,3 +134,25 @@ export async function failJob(jobId: string, videoId: string, errorMessage: stri
     .update({ status: "failed" })
     .eq("id", videoId);
 }
+
+/**
+ * Release a job back to the queue (for graceful shutdown or error recovery)
+ * Increments retry count so it can be picked up by another worker
+ */
+export async function releaseJob(jobId: string): Promise<void> {
+  const { error } = await supabase
+    .from("transcode_jobs")
+    .update({
+      status: "pending",
+      worker_id: null,
+      started_at: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", jobId);
+
+  if (error) {
+    console.error("Error releasing job:", error);
+  } else {
+    console.log(`🔄 Job ${jobId} released back to queue`);
+  }
+}

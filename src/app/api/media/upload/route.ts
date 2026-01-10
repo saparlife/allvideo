@@ -3,6 +3,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { r2Client, R2_BUCKET, R2_PUBLIC_URL } from "@/lib/r2/client";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { processImage, getImageMetadata, parseVariants } from "@/lib/processing/image";
+import { validateFile, type SubscriptionTier } from "@/lib/validation/file";
 
 type MediaType = "image" | "audio" | "file";
 
@@ -50,6 +51,24 @@ export async function POST(request: NextRequest) {
       .eq("id", user.id)
       .single();
 
+    // Get subscription tier
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: subscription } = await (db as any)
+      .from("subscriptions")
+      .select("tier")
+      .eq("user_id", user.id)
+      .eq("is_active", true)
+      .single();
+
+    const tier = (subscription?.tier || "free") as SubscriptionTier;
+
+    // Validate file (size limit and sanitize filename)
+    const validation = validateFile(file.name, file.size, tier);
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
+    }
+    const safeName = validation.sanitizedFilename!;
+
     if (profile) {
       const newUsage = profile.storage_used_bytes + file.size;
       if (newUsage > profile.storage_limit_bytes) {
@@ -70,7 +89,7 @@ export async function POST(request: NextRequest) {
         .insert({
           user_id: user.id,
           title,
-          original_filename: file.name,
+          original_filename: safeName,
           original_size_bytes: file.size,
           mime_type: file.type,
           media_type: "image",
@@ -159,7 +178,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Handle audio/file uploads (simple storage without processing)
-    const extension = file.name.split(".").pop() || "bin";
+    const extension = safeName.split(".").pop() || "bin";
     const folder = mediaType === "audio" ? "audio" : "files";
 
     // Create record
@@ -169,7 +188,7 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: user.id,
         title,
-        original_filename: file.name,
+        original_filename: safeName,
         original_size_bytes: file.size,
         mime_type: file.type,
         media_type: mediaType,
