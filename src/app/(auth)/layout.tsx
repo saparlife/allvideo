@@ -12,9 +12,9 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
             <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-2xl font-bold text-gray-900">UnlimVideo</span>
+            <span className="text-2xl font-bold text-gray-900">1stream</span>
           </Link>
-          <p className="text-gray-500">Unlimited bandwidth video hosting</p>
+          <p className="text-gray-500">Media storage API for developers</p>
         </div>
         {children}
       </div>

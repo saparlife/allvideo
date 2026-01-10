@@ -125,7 +125,7 @@ export default function PricingPage() {
             <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900">UnlimVideo</span>
+            <span className="text-xl font-bold text-gray-900">1stream</span>
           </Link>
           <div className="flex items-center gap-6">
             <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
@@ -168,7 +168,7 @@ export default function PricingPage() {
               </div>
               <div className="hidden md:block w-px h-12 bg-gray-200" />
               <div className="text-center md:text-right">
-                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Same on UnlimVideo</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Same on 1stream</p>
                 <p className="text-lg font-semibold text-gray-900">50TB/month = <span className="text-emerald-500">$0 extra</span></p>
               </div>
             </div>
@@ -219,7 +219,7 @@ export default function PricingPage() {
                 >
                   <Link href={
                     plan.name === "Enterprise"
-                      ? "mailto:hello@unlimvideo.com"
+                      ? "mailto:hello@1stream.dev"
                       : plan.name === "Free"
                         ? "/register"
                         : `/checkout?plan=${plan.name.toLowerCase()}`
@@ -251,7 +251,7 @@ export default function PricingPage() {
             Need a custom plan or have questions?
           </p>
           <Button asChild className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium">
-            <a href="mailto:hello@unlimvideo.com">Contact Sales</a>
+            <a href="mailto:hello@1stream.dev">Contact Sales</a>
           </Button>
         </div>
       </main>
@@ -264,18 +264,18 @@ export default function PricingPage() {
               <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
                 <Zap className="w-4 h-4 text-white" />
               </div>
-              <span className="font-semibold text-gray-900">UnlimVideo</span>
+              <span className="font-semibold text-gray-900">1stream</span>
             </div>
             <div className="flex items-center gap-8">
               <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
                 Home
               </Link>
-              <a href="mailto:hello@unlimvideo.com" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+              <a href="mailto:hello@1stream.dev" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
                 Contact
               </a>
             </div>
             <p className="text-sm text-gray-500">
-              &copy; {new Date().getFullYear()} UnlimVideo
+              &copy; {new Date().getFullYear()} 1stream.dev
             </p>
           </div>
         </div>

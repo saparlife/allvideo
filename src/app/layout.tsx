@@ -13,12 +13,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "UnlimVideo - Video Hosting with Unlimited Bandwidth",
-  description: "Stop paying for video views. Video hosting with truly unlimited bandwidth. No overages, no surprises. Save thousands compared to Vimeo.",
-  keywords: ["video hosting", "unlimited bandwidth", "HLS streaming", "video CDN", "vimeo alternative"],
+  title: "1stream.dev - Media Storage API for Developers",
+  description: "One API for all your media needs. Video, images, audio, files. Upload once, get optimized URLs. Built for developers.",
+  keywords: ["media storage", "video api", "image processing", "audio streaming", "developer api", "cloudflare r2"],
   openGraph: {
-    title: "UnlimVideo - Stop Paying for Video Views",
-    description: "Video hosting with truly unlimited bandwidth. No overages, no surprises.",
+    title: "1stream.dev - Media Storage API for Developers",
+    description: "One API for all your media needs. Video, images, audio, files.",
     type: "website",
   },
 };

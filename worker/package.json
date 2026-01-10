@@ -1,7 +1,7 @@
 {
-  "name": "allvideo-worker",
+  "name": "onestream-worker",
   "version": "1.0.0",
-  "description": "Video transcoding worker for AllVideo.one",
+  "description": "Media processing worker for 1stream.dev",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",

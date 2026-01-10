@@ -188,7 +188,7 @@ export default function SubscriptionPage() {
                   disabled={currentPlan === plan.name.toLowerCase()}
                   onClick={() => {
                     if (plan.name === "Enterprise") {
-                      window.location.href = "mailto:hello@unlimvideo.com";
+                      window.location.href = "mailto:hello@1stream.dev";
                     } else {
                       router.push(`/checkout?plan=${plan.name.toLowerCase()}`);
                     }
@@ -203,7 +203,7 @@ export default function SubscriptionPage() {
       </div>
 
       <p className="text-sm text-gray-500 text-center">
-        Need more storage? Contact us at hello@unlimvideo.com for custom enterprise plans.
+        Need more storage? Contact us at hello@1stream.dev for custom enterprise plans.
       </p>
     </div>
   );

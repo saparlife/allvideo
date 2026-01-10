@@ -62,7 +62,7 @@ export default function ApiKeysPage() {
 
   const generateKey = () => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let key = "av_live_";
+    let key = "1s_live_";
     for (let i = 0; i < 32; i++) {
       key += chars.charAt(Math.floor(Math.random() * chars.length));
     }
@@ -309,15 +309,15 @@ export default function ApiKeysPage() {
           <div>
             <h4 className="text-sm font-medium text-gray-700 mb-2">Get Video HLS URL</h4>
             <pre className="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-x-auto">
-{`curl -X GET "https://unlimvideo.com/api/public/videos/{videoId}" \\
-  -H "X-API-Key: uv_live_xxxxx"`}
+{`curl -X GET "https://api.1stream.dev/v1/videos/{videoId}" \\
+  -H "X-API-Key: 1s_live_xxxxx"`}
             </pre>
           </div>
           <div>
             <h4 className="text-sm font-medium text-gray-700 mb-2">Upload Video</h4>
             <pre className="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-x-auto">
-{`curl -X POST "https://unlimvideo.com/api/public/videos" \\
-  -H "X-API-Key: uv_live_xxxxx" \\
+{`curl -X POST "https://api.1stream.dev/v1/videos" \\
+  -H "X-API-Key: 1s_live_xxxxx" \\
   -H "Content-Type: application/json" \\
   -d '{"title": "My Video", "filename": "video.mp4", "size": 10485760}'`}
             </pre>

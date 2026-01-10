@@ -1,8 +1,8 @@
-# Claude Context - AllVideo
+# Claude Context - 1stream.dev
 
 ## Что это за проект
 
-AllVideo.one — платформа для хостинга видео с автоматическим HLS транскодированием. Пользователь загружает видео, система конвертирует в несколько качеств (360p-1080p), выдаёт embed код.
+1stream.dev — универсальный Media Storage API для разработчиков. Один API для всех медиа-нужд: видео, изображения, аудио, файлы.
 
 ## Архитектура
 
@@ -30,26 +30,47 @@ ssh root@65.21.195.154 "docker logs -f worker-worker-1"
 ssh root@65.21.195.154 "cd /data/docker/worker && docker compose restart"
 ```
 
-## Как работает транскодирование
+## Как работает обработка медиа
 
-1. Пользователь загружает видео → R2 (через presigned URL)
-2. Создаётся запись в Supabase: `videos` + `transcode_jobs`
-3. Worker (polling каждые 10 сек) берёт задачу
-4. FFmpeg конвертирует в HLS (несколько качеств)
-5. Загружает сегменты в R2
-6. Обновляет статус в Supabase → "completed"
+### Video
+1. Upload → R2 (presigned URL)
+2. Создаётся `media` + `jobs` записи
+3. Worker (polling) берёт задачу
+4. FFmpeg → HLS (несколько качеств)
+5. Upload сегментов в R2
+6. Статус → "ready"
+
+### Image (планируется)
+- Sharp.js для resize/compress
+- Синхронно в API (быстро)
+
+### Audio (планируется)
+- FFmpeg → MP3
+- Waveform generation
+- Синхронно в API
+
+### Files (планируется)
+- Прямой upload в R2
+- PDF preview (первая страница)
 
 ## Ключевые файлы
 
-- `worker/src/index.ts` — логика транскодирования
+- `worker/src/index.ts` — логика обработки
 - `worker/.env` — ключи Supabase + R2 (на сервере)
-- `src/app/api/videos/` — API endpoints
+- `src/app/api/` — API endpoints
 - `supabase/migrations/` — схема БД
+- `plan.md` — план разработки
 
-## Другие сервисы на том же сервере
+## API Structure (цель)
 
-- **Nextcloud** (облако): http://65.21.195.154:8080
-- Документация сервера: `/Users/sapar/Documents/server/`
+```
+POST /api/v1/upload          - Universal upload
+POST /api/v1/videos          - Video upload
+POST /api/v1/images          - Image upload
+POST /api/v1/audio           - Audio upload
+POST /api/v1/files           - File upload
+GET  /api/v1/media           - List all media
+```
 
 ## Частые задачи
 
@@ -66,6 +87,5 @@ ssh root@65.21.195.154 "docker logs --tail 20 worker-worker-1"
 
 ### Посмотреть очередь задач
 ```sql
--- В Supabase SQL Editor
-SELECT * FROM transcode_jobs WHERE status = 'pending' ORDER BY created_at;
+SELECT * FROM jobs WHERE status = 'pending' ORDER BY created_at;
 ```
