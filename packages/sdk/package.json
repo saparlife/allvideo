@@ -1,0 +1,36 @@
+{
+  "name": "@1stream/sdk",
+  "version": "0.1.0",
+  "description": "Official SDK for stream.1app.to - Universal Media Storage API",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "1stream",
+    "media",
+    "video",
+    "image",
+    "audio",
+    "storage",
+    "api",
+    "sdk"
+  ],
+  "author": "1stream",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/1stream/sdk"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  }
+}

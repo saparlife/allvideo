@@ -135,38 +135,24 @@ export async function failJob(jobId: string, videoId: string, errorMessage: stri
     .eq("id", videoId);
 }
 
-export async function clearOriginalKey(videoId: string): Promise<void> {
-  await supabase
-    .from("videos")
-    .update({ original_key: null })
-    .eq("id", videoId);
-}
-
-export async function saveTranscription(
-  videoId: string,
-  text: string,
-  vtt: string,
-  segments: any[],
-  language: string
-): Promise<void> {
-  await supabase
-    .from("videos")
+/**
+ * Release a job back to the queue (for graceful shutdown or error recovery)
+ * Increments retry count so it can be picked up by another worker
+ */
+export async function releaseJob(jobId: string): Promise<void> {
+  const { error } = await supabase
+    .from("transcode_jobs")
     .update({
-      transcript_text: text,
-      transcript_vtt: vtt,
-      transcript_segments: segments,
-      transcript_language: language,
-      transcription_status: "completed",
+      status: "pending",
+      worker_id: null,
+      started_at: null,
+      updated_at: new Date().toISOString(),
     })
-    .eq("id", videoId);
-}
+    .eq("id", jobId);
 
-export async function updateTranscriptionStatus(
-  videoId: string,
-  status: "pending" | "processing" | "completed" | "failed" | "skipped"
-): Promise<void> {
-  await supabase
-    .from("videos")
-    .update({ transcription_status: status })
-    .eq("id", videoId);
+  if (error) {
+    console.error("Error releasing job:", error);
+  } else {
+    console.log(`🔄 Job ${jobId} released back to queue`);
+  }
 }

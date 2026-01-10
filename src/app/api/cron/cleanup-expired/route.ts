@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
       await (supabaseAdmin as any)
         .from("users")
         .update({
-          storage_limit_bytes: 10 * 1024 * 1024 * 1024, // 10GB free
+          storage_limit_bytes: 1 * 1024 * 1024 * 1024, // 1GB free
           bandwidth_limit_bytes: 100 * 1024 * 1024 * 1024, // 100GB free
           storage_used_bytes: 0,
           updated_at: now,
@@ -143,7 +143,7 @@ export async function GET(request: NextRequest) {
       await supabaseAdmin.from("subscriptions").insert({
         user_id: userId,
         tier: "free",
-        storage_limit_gb: 10,
+        storage_limit_gb: 1,
         bandwidth_limit_gb: 100,
         is_active: true,
         starts_at: now,

@@ -1,6 +1,26 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+// Validate required environment variables
+const requiredEnvVars = [
+  "SUPABASE_URL",
+  "SUPABASE_SERVICE_ROLE_KEY",
+  "R2_ACCOUNT_ID",
+  "R2_ACCESS_KEY_ID",
+  "R2_SECRET_ACCESS_KEY",
+  "R2_BUCKET",
+  "R2_PUBLIC_URL",
+] as const;
+
+const missing = requiredEnvVars.filter(key => !process.env[key]);
+
+if (missing.length > 0) {
+  console.error("❌ Missing required environment variables:");
+  missing.forEach(key => console.error(`   - ${key}`));
+  console.error("\nPlease check your .env file.");
+  process.exit(1);
+}
+
 export const config = {
   supabase: {
     url: process.env.SUPABASE_URL!,
