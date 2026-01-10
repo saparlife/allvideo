@@ -23,7 +23,7 @@ export default async function DashboardLayout({
     .eq("id", user.id)
     .single();
 
-  const isAdmin = profile?.role === "admin";
+  const isAdmin = (profile as { role?: string } | null)?.role === "admin";
 
   return (
     <div className="flex min-h-screen bg-gray-50">
