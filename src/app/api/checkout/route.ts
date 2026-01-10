@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import DodoPayments from "dodopayments";
 
-const client = new DodoPayments({
-  bearerToken: process.env.DODO_PAYMENTS_API_KEY!,
-  environment: (process.env.DODO_PAYMENTS_ENVIRONMENT as "test_mode" | "live_mode") || "live_mode",
-});
+// Lazy init to avoid build-time errors when env vars are not set
+function getClient() {
+  if (!process.env.DODO_PAYMENTS_API_KEY) {
+    throw new Error("DODO_PAYMENTS_API_KEY is not configured");
+  }
+  return new DodoPayments({
+    bearerToken: process.env.DODO_PAYMENTS_API_KEY,
+    environment: (process.env.DODO_PAYMENTS_ENVIRONMENT as "test_mode" | "live_mode") || "live_mode",
+  });
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,7 +27,7 @@ export async function POST(request: NextRequest) {
     const productId = body.product_cart[0]?.product_id;
 
     // For subscription products, use subscriptions.create
-    const subscription = await client.subscriptions.create({
+    const subscription = await getClient().subscriptions.create({
       product_id: productId,
       quantity: 1,
       customer: {
@@ -70,7 +76,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const subscription = await client.subscriptions.create({
+    const subscription = await getClient().subscriptions.create({
       product_id: productId,
       quantity: 1,
       customer: {
