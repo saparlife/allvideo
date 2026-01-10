@@ -103,7 +103,7 @@ export default function RegisterPage() {
             />
           </div>
           <p className="text-xs text-gray-500 pb-2">
-            By signing up, you agree to our Terms of Service and get 10GB of free storage.
+            By signing up, you agree to our Terms of Service and get 1GB of free storage.
           </p>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">

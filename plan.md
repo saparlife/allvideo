@@ -49,18 +49,18 @@
 - [x] Commit: "Add file storage with signed URLs"
 
 ## Phase 6: Webhooks
-- [ ] Create webhooks table
-- [ ] Add webhook configuration in dashboard
-- [ ] Implement webhook delivery (media.ready, media.failed)
-- [ ] Add retry logic
-- [ ] Commit: "Add webhook system"
+- [x] Create webhooks table
+- [x] Add webhook configuration in dashboard
+- [x] Implement webhook delivery (media.ready, media.failed)
+- [x] Add retry logic
+- [x] Commit: "Add webhook system"
 
 ## Phase 7: SDK & Docs
-- [ ] Create @1stream/sdk package
-- [ ] JavaScript/TypeScript SDK
+- [x] Create @1stream/sdk package
+- [x] JavaScript/TypeScript SDK
 - [ ] React components (VideoPlayer, AudioPlayer)
 - [ ] API documentation page
-- [ ] Commit: "Add SDK and documentation"
+- [x] Commit: "Add SDK and documentation"
 
 ---
 

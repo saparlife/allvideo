@@ -7,7 +7,7 @@ import * as fs from "fs";
 
 console.log(`
 ╔═══════════════════════════════════════════════════════════════╗
-║               1stream.dev Media Processing Worker             ║
+║               stream.1app.to Media Processing Worker             ║
 ║                                                               ║
 ║  Worker ID: ${config.worker.id.padEnd(47)}║
 ║  Poll Interval: ${(config.worker.pollInterval / 1000 + "s").padEnd(44)}║

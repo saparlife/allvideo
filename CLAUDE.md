@@ -1,8 +1,8 @@
-# Claude Context - 1stream.dev
+# Claude Context - stream.1app.to
 
 ## Что это за проект
 
-1stream.dev — универсальный Media Storage API для разработчиков. Один API для всех медиа-нужд: видео, изображения, аудио, файлы.
+stream.1app.to — универсальный Media Storage API для разработчиков. Один API для всех медиа-нужд: видео, изображения, аудио, файлы.
 
 ## Архитектура
 

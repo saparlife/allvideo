@@ -13,11 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "1stream.dev - Media Storage API for Developers",
+  title: "stream.1app.to - Media Storage API for Developers",
   description: "One API for all your media needs. Video, images, audio, files. Upload once, get optimized URLs. Built for developers.",
   keywords: ["media storage", "video api", "image processing", "audio streaming", "developer api", "cloudflare r2"],
   openGraph: {
-    title: "1stream.dev - Media Storage API for Developers",
+    title: "stream.1app.to - Media Storage API for Developers",
     description: "One API for all your media needs. Video, images, audio, files.",
     type: "website",
   },

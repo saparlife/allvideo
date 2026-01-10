@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Zap, ArrowRight, Video, Image, Music, FileText, Code, Terminal } from "lucide-react";
+import { Highlight, themes } from "prism-react-renderer";
 
 function FeatureCard({ icon: Icon, title, description, code }: {
   icon: React.ElementType;
@@ -103,22 +104,53 @@ export default function Home() {
                 <div className="w-3 h-3 rounded-full bg-green-500" />
                 <span className="text-gray-500 text-sm ml-2">Upload any media</span>
               </div>
-              <pre className="text-sm overflow-x-auto">
-                <code className="text-gray-300">{`curl -X POST https://api.1stream.dev/v1/upload \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -F "file=@video.mp4" \\
-  -F 'metadata={"userId": "123", "projectId": "abc"}'
-
-# Response
-{
+              <div className="space-y-4">
+                <div>
+                  <span className="text-gray-500 text-xs mb-1 block">Request</span>
+                  <pre className="text-sm overflow-x-auto">
+                    <code className="text-cyan-400">curl</code>
+                    <code className="text-gray-300">{` -X `}</code>
+                    <code className="text-yellow-400">POST</code>
+                    <code className="text-green-400">{` https://stream.1app.to/v1/upload`}</code>
+                    <code className="text-gray-300">{` \\
+  -H `}</code>
+                    <code className="text-orange-300">{`"Authorization: Bearer YOUR_API_KEY"`}</code>
+                    <code className="text-gray-300">{` \\
+  -F `}</code>
+                    <code className="text-orange-300">{`"file=@video.mp4"`}</code>
+                    <code className="text-gray-300">{` \\
+  -F `}</code>
+                    <code className="text-orange-300">{`'metadata={"userId": "123", "projectId": "abc"}'`}</code>
+                  </pre>
+                </div>
+                <div>
+                  <span className="text-gray-500 text-xs mb-1 block">Response</span>
+                  <Highlight
+                    theme={themes.nightOwl}
+                    code={`{
   "id": "med_x7k9m2",
   "type": "video",
   "status": "ready",
-  "hls_url": "https://cdn.1stream.dev/med_x7k9m2/master.m3u8",
-  "thumbnail": "https://cdn.1stream.dev/med_x7k9m2/thumb.jpg",
+  "hls_url": "https://cdn.1app.to/med_x7k9m2/master.m3u8",
+  "thumbnail": "https://cdn.1app.to/med_x7k9m2/thumb.jpg",
   "metadata": {"userId": "123", "projectId": "abc"}
-}`}</code>
-              </pre>
+}`}
+                    language="json"
+                  >
+                    {({ className, style, tokens, getLineProps, getTokenProps }) => (
+                      <pre className={`${className} text-sm overflow-x-auto`} style={{ ...style, background: 'transparent', margin: 0 }}>
+                        {tokens.map((line, i) => (
+                          <div key={i} {...getLineProps({ line })}>
+                            {line.map((token, key) => (
+                              <span key={key} {...getTokenProps({ token })} />
+                            ))}
+                          </div>
+                        ))}
+                      </pre>
+                    )}
+                  </Highlight>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -256,7 +288,7 @@ export default function Home() {
               <span className="font-semibold text-gray-900">1stream</span>
             </div>
             <p className="text-sm text-gray-500">
-              &copy; {new Date().getFullYear()} 1stream.dev
+              &copy; {new Date().getFullYear()} stream.1app.to
             </p>
           </div>
         </div>

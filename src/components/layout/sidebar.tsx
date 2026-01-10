@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
-  Video,
+  FolderOpen,
   Key,
   Settings,
   CreditCard,
@@ -13,6 +13,8 @@ import {
   BarChart3,
   LogOut,
   Zap,
+  Webhook,
+  BookOpen,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -30,14 +32,24 @@ const userNavItems = [
     icon: LayoutDashboard,
   },
   {
-    title: "Videos",
-    href: "/videos",
-    icon: Video,
+    title: "Media",
+    href: "/media",
+    icon: FolderOpen,
   },
   {
     title: "API Keys",
     href: "/api-keys",
     icon: Key,
+  },
+  {
+    title: "Docs",
+    href: "/docs",
+    icon: BookOpen,
+  },
+  {
+    title: "Webhooks",
+    href: "/webhooks",
+    icon: Webhook,
   },
   {
     title: "Subscription",
@@ -53,7 +65,7 @@ const userNavItems = [
 
 const adminNavItems = [
   {
-    title: "Admin Dashboard",
+    title: "Overview",
     href: "/admin",
     icon: BarChart3,
   },
@@ -63,9 +75,9 @@ const adminNavItems = [
     icon: Users,
   },
   {
-    title: "All Videos",
-    href: "/admin/videos",
-    icon: Video,
+    title: "All Media",
+    href: "/admin/media",
+    icon: FolderOpen,
   },
 ];
 

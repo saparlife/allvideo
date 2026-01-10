@@ -56,7 +56,7 @@ function formatBytes(bytes: number): string {
 export default function SubscriptionPage() {
   const [loading, setLoading] = useState(true);
   const [storageUsed, setStorageUsed] = useState(0);
-  const [storageLimit, setStorageLimit] = useState(10 * 1024 * 1024 * 1024); // 10GB free default
+  const [storageLimit, setStorageLimit] = useState(1 * 1024 * 1024 * 1024); // 1GB free default
   const [currentPlan, setCurrentPlan] = useState<string>("free");
   const supabase = createClient();
   const router = useRouter();
@@ -75,7 +75,7 @@ export default function SubscriptionPage() {
 
       if (data) {
         setStorageUsed(data.storage_used_bytes || 0);
-        const limit = data.storage_limit_bytes || 10 * 1024 * 1024 * 1024;
+        const limit = data.storage_limit_bytes || 1 * 1024 * 1024 * 1024;
         setStorageLimit(limit);
 
         // Determine current plan based on storage limit
@@ -188,7 +188,7 @@ export default function SubscriptionPage() {
                   disabled={currentPlan === plan.name.toLowerCase()}
                   onClick={() => {
                     if (plan.name === "Enterprise") {
-                      window.location.href = "mailto:hello@1stream.dev";
+                      window.location.href = "mailto:hello@1app.to";
                     } else {
                       router.push(`/checkout?plan=${plan.name.toLowerCase()}`);
                     }
@@ -203,7 +203,7 @@ export default function SubscriptionPage() {
       </div>
 
       <p className="text-sm text-gray-500 text-center">
-        Need more storage? Contact us at hello@1stream.dev for custom enterprise plans.
+        Need more storage? Contact us at hello@1app.to for custom enterprise plans.
       </p>
     </div>
   );

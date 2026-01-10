@@ -7,12 +7,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Upload, X, Video, CheckCircle, AlertCircle } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Upload,
+  X,
+  Video,
+  Image,
+  Music,
+  FileText,
+  CheckCircle,
+  AlertCircle,
+  ArrowLeft,
+} from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
 
 type UploadStatus = "idle" | "uploading" | "processing" | "complete" | "error";
+type MediaType = "video" | "image" | "audio" | "file";
 
-const CONCURRENT_UPLOADS = 4; // Number of parallel chunk uploads
+const CONCURRENT_UPLOADS = 4;
 
 interface PartInfo {
   partNumber: number;
@@ -24,7 +37,51 @@ interface UploadedPart {
   etag: string;
 }
 
+const ACCEPTED_TYPES: Record<MediaType, { accept: string; desc: string; maxSize: string }> = {
+  video: {
+    accept: "video/*",
+    desc: "MP4, MOV, AVI, MKV, WMV",
+    maxSize: "10GB",
+  },
+  image: {
+    accept: "image/*",
+    desc: "JPG, PNG, GIF, WebP, AVIF",
+    maxSize: "50MB",
+  },
+  audio: {
+    accept: "audio/*",
+    desc: "MP3, WAV, AAC, FLAC, OGG",
+    maxSize: "500MB",
+  },
+  file: {
+    accept: "*/*",
+    desc: "Any file type",
+    maxSize: "2GB",
+  },
+};
+
+function getMediaTypeFromFile(file: File): MediaType {
+  if (file.type.startsWith("video/")) return "video";
+  if (file.type.startsWith("image/")) return "image";
+  if (file.type.startsWith("audio/")) return "audio";
+  return "file";
+}
+
+function getTypeIcon(type: MediaType) {
+  switch (type) {
+    case "video":
+      return <Video className="h-6 w-6 text-gray-500" />;
+    case "image":
+      return <Image className="h-6 w-6 text-gray-500" />;
+    case "audio":
+      return <Music className="h-6 w-6 text-gray-500" />;
+    default:
+      return <FileText className="h-6 w-6 text-gray-500" />;
+  }
+}
+
 export default function UploadPage() {
+  const [mediaType, setMediaType] = useState<MediaType>("video");
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [dragActive, setDragActive] = useState(false);
@@ -52,13 +109,11 @@ export default function UploadPage() {
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const droppedFile = e.dataTransfer.files[0];
-      if (droppedFile.type.startsWith("video/")) {
-        setFile(droppedFile);
-        if (!title) {
-          setTitle(droppedFile.name.replace(/\.[^/.]+$/, ""));
-        }
-      } else {
-        toast.error("Please upload a video file");
+      const detectedType = getMediaTypeFromFile(droppedFile);
+      setMediaType(detectedType);
+      setFile(droppedFile);
+      if (!title) {
+        setTitle(droppedFile.name.replace(/\.[^/.]+$/, ""));
       }
     }
   }, [title]);
@@ -66,6 +121,8 @@ export default function UploadPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
+      const detectedType = getMediaTypeFromFile(selectedFile);
+      setMediaType(detectedType);
       setFile(selectedFile);
       if (!title) {
         setTitle(selectedFile.name.replace(/\.[^/.]+$/, ""));
@@ -97,6 +154,145 @@ export default function UploadPage() {
     return { partNumber: part.partNumber, etag };
   };
 
+  const handleVideoUpload = async () => {
+    if (!file || !title) return;
+
+    abortControllerRef.current = new AbortController();
+    const startTime = Date.now();
+    let totalUploaded = 0;
+
+    // Step 1: Initialize multipart upload
+    const initResponse = await fetch("/api/videos/upload/init", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        filename: file.name,
+        size: file.size,
+        contentType: file.type,
+        title,
+      }),
+    });
+
+    if (!initResponse.ok) {
+      const error = await initResponse.json();
+      throw new Error(error.error || "Failed to initialize upload");
+    }
+
+    const { videoId, uploadId, parts, chunkSize } = await initResponse.json();
+
+    // Step 2: Upload parts in parallel
+    const uploadedParts: UploadedPart[] = [];
+    const partsQueue = [...parts] as PartInfo[];
+    const inProgress = new Set<number>();
+
+    const updateProgress = () => {
+      const progress = Math.round((uploadedParts.length / parts.length) * 100);
+      setUploadProgress(progress);
+
+      const elapsed = (Date.now() - startTime) / 1000;
+      if (elapsed > 0) {
+        const bytesPerSecond = totalUploaded / elapsed;
+        const mbps = (bytesPerSecond * 8) / (1024 * 1024);
+        setUploadSpeed(`${mbps.toFixed(1)} Mbps`);
+      }
+    };
+
+    const processQueue = async () => {
+      while (partsQueue.length > 0 || inProgress.size > 0) {
+        while (partsQueue.length > 0 && inProgress.size < CONCURRENT_UPLOADS) {
+          const part = partsQueue.shift()!;
+          inProgress.add(part.partNumber);
+
+          uploadPart(file, part, chunkSize, abortControllerRef.current!.signal)
+            .then((uploadedPart) => {
+              uploadedParts.push(uploadedPart);
+              totalUploaded += Math.min(chunkSize, file.size - (part.partNumber - 1) * chunkSize);
+              inProgress.delete(part.partNumber);
+              updateProgress();
+            })
+            .catch((err) => {
+              if (err.name !== "AbortError") {
+                throw err;
+              }
+            });
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        if (partsQueue.length === 0 && inProgress.size === 0) {
+          break;
+        }
+      }
+    };
+
+    await processQueue();
+
+    uploadedParts.sort((a, b) => a.partNumber - b.partNumber);
+
+    setUploadProgress(100);
+    setStatus("processing");
+
+    // Step 3: Complete multipart upload
+    const completeResponse = await fetch("/api/videos/upload/complete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        videoId,
+        uploadId,
+        parts: uploadedParts,
+      }),
+    });
+
+    if (!completeResponse.ok) {
+      throw new Error("Failed to complete upload");
+    }
+  };
+
+  const handleDirectUpload = async () => {
+    if (!file || !title) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", title);
+
+    const endpoint = `/api/media/upload`;
+
+    const xhr = new XMLHttpRequest();
+
+    return new Promise<void>((resolve, reject) => {
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable) {
+          const progress = Math.round((e.loaded / e.total) * 100);
+          setUploadProgress(progress);
+        }
+      });
+
+      xhr.addEventListener("load", () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve();
+        } else {
+          try {
+            const error = JSON.parse(xhr.responseText);
+            reject(new Error(error.error || "Upload failed"));
+          } catch {
+            reject(new Error("Upload failed"));
+          }
+        }
+      });
+
+      xhr.addEventListener("error", () => reject(new Error("Upload failed")));
+      xhr.addEventListener("abort", () => reject(new Error("Upload cancelled")));
+
+      abortControllerRef.current = {
+        abort: () => xhr.abort(),
+        signal: { aborted: false } as AbortSignal,
+      } as AbortController;
+
+      xhr.open("POST", endpoint);
+      xhr.send(formData);
+    });
+  };
+
   const handleUpload = async () => {
     if (!file || !title) {
       toast.error("Please select a file and enter a title");
@@ -108,110 +304,21 @@ export default function UploadPage() {
     setErrorMessage("");
     setUploadSpeed("");
 
-    abortControllerRef.current = new AbortController();
-    const startTime = Date.now();
-    let totalUploaded = 0;
-
     try {
-      // Step 1: Initialize multipart upload
-      const initResponse = await fetch("/api/videos/upload/init", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          filename: file.name,
-          size: file.size,
-          contentType: file.type,
-          title,
-        }),
-      });
-
-      if (!initResponse.ok) {
-        const error = await initResponse.json();
-        throw new Error(error.error || "Failed to initialize upload");
-      }
-
-      const { videoId, uploadId, parts, chunkSize } = await initResponse.json();
-
-      // Step 2: Upload parts in parallel with concurrency limit
-      const uploadedParts: UploadedPart[] = [];
-      const partsQueue = [...parts] as PartInfo[];
-      const inProgress = new Set<number>();
-
-      const updateProgress = () => {
-        const progress = Math.round((uploadedParts.length / parts.length) * 100);
-        setUploadProgress(progress);
-
-        // Calculate speed
-        const elapsed = (Date.now() - startTime) / 1000;
-        if (elapsed > 0) {
-          const bytesPerSecond = totalUploaded / elapsed;
-          const mbps = (bytesPerSecond * 8) / (1024 * 1024);
-          setUploadSpeed(`${mbps.toFixed(1)} Mbps`);
-        }
-      };
-
-      const processQueue = async () => {
-        while (partsQueue.length > 0 || inProgress.size > 0) {
-          // Start new uploads up to concurrency limit
-          while (partsQueue.length > 0 && inProgress.size < CONCURRENT_UPLOADS) {
-            const part = partsQueue.shift()!;
-            inProgress.add(part.partNumber);
-
-            uploadPart(file, part, chunkSize, abortControllerRef.current!.signal)
-              .then((uploadedPart) => {
-                uploadedParts.push(uploadedPart);
-                totalUploaded += Math.min(chunkSize, file.size - (part.partNumber - 1) * chunkSize);
-                inProgress.delete(part.partNumber);
-                updateProgress();
-              })
-              .catch((err) => {
-                if (err.name !== "AbortError") {
-                  throw err;
-                }
-              });
-          }
-
-          // Wait a bit before checking again
-          await new Promise((resolve) => setTimeout(resolve, 100));
-
-          // Check if all done
-          if (partsQueue.length === 0 && inProgress.size === 0) {
-            break;
-          }
-        }
-      };
-
-      await processQueue();
-
-      // Sort parts by part number
-      uploadedParts.sort((a, b) => a.partNumber - b.partNumber);
-
-      setUploadProgress(100);
-      setStatus("processing");
-
-      // Step 3: Complete multipart upload
-      const completeResponse = await fetch("/api/videos/upload/complete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          videoId,
-          uploadId,
-          parts: uploadedParts,
-        }),
-      });
-
-      if (!completeResponse.ok) {
-        throw new Error("Failed to complete upload");
+      if (mediaType === "video") {
+        await handleVideoUpload();
+      } else {
+        await handleDirectUpload();
       }
 
       setStatus("complete");
-      toast.success("Video uploaded successfully! Processing will begin shortly.");
+      toast.success(`${mediaType.charAt(0).toUpperCase() + mediaType.slice(1)} uploaded successfully!`);
 
       setTimeout(() => {
-        router.push("/videos");
+        router.push("/media");
       }, 2000);
     } catch (error) {
-      if ((error as Error).name === "AbortError") {
+      if ((error as Error).name === "AbortError" || (error as Error).message === "Upload cancelled") {
         setStatus("idle");
         setUploadProgress(0);
         return;
@@ -239,18 +346,43 @@ export default function UploadPage() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
+  const typeConfig = ACCEPTED_TYPES[mediaType];
+
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Upload Video</h1>
-        <p className="text-gray-500">
-          Upload a video file to your library
-        </p>
+      <div className="flex items-center gap-4">
+        <Button asChild variant="ghost" size="icon">
+          <Link href="/media">
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+        </Button>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Upload Media</h1>
+          <p className="text-gray-500">Upload videos, images, audio, or files</p>
+        </div>
       </div>
+
+      {/* Media Type Selector */}
+      <Tabs value={mediaType} onValueChange={(v) => { setMediaType(v as MediaType); setFile(null); }}>
+        <TabsList className="bg-gray-100 w-full">
+          <TabsTrigger value="video" className="flex-1 data-[state=active]:bg-white">
+            <Video className="w-4 h-4 mr-2" /> Video
+          </TabsTrigger>
+          <TabsTrigger value="image" className="flex-1 data-[state=active]:bg-white">
+            <Image className="w-4 h-4 mr-2" /> Image
+          </TabsTrigger>
+          <TabsTrigger value="audio" className="flex-1 data-[state=active]:bg-white">
+            <Music className="w-4 h-4 mr-2" /> Audio
+          </TabsTrigger>
+          <TabsTrigger value="file" className="flex-1 data-[state=active]:bg-white">
+            <FileText className="w-4 h-4 mr-2" /> File
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle className="text-gray-900">Video File</CardTitle>
+          <CardTitle className="text-gray-900 capitalize">{mediaType} File</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Drop Zone */}
@@ -268,32 +400,34 @@ export default function UploadPage() {
             >
               <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
               <p className="text-lg font-medium text-gray-900 mb-2">
-                Drop your video here
+                Drop your {mediaType} here
               </p>
-              <p className="text-sm text-gray-500 mb-4">
-                or click to browse
-              </p>
+              <p className="text-sm text-gray-500 mb-4">or click to browse</p>
               <Input
                 type="file"
-                accept="video/*"
+                accept={typeConfig.accept}
                 onChange={handleFileChange}
                 className="hidden"
                 id="file-upload"
               />
-              <Button asChild variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
+              <Button
+                asChild
+                variant="outline"
+                className="border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
                 <label htmlFor="file-upload" className="cursor-pointer">
                   Select File
                 </label>
               </Button>
               <p className="text-xs text-gray-400 mt-4">
-                Supported formats: MP4, MOV, AVI, MKV, WMV (max 10GB)
+                Supported: {typeConfig.desc} (max {typeConfig.maxSize})
               </p>
             </div>
           ) : (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <Video className="h-6 w-6 text-gray-500" />
+                  {getTypeIcon(mediaType)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-gray-900 truncate">{file.name}</p>
@@ -361,13 +495,13 @@ export default function UploadPage() {
           {file && status === "idle" && (
             <div className="space-y-2">
               <Label htmlFor="title" className="text-gray-700">
-                Video Title
+                Title
               </Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Enter video title"
+                placeholder="Enter title"
                 className="bg-white border-gray-300 text-gray-900"
               />
             </div>
@@ -381,7 +515,7 @@ export default function UploadPage() {
               disabled={!title}
             >
               <Upload className="mr-2 h-4 w-4" />
-              Upload Video
+              Upload {mediaType.charAt(0).toUpperCase() + mediaType.slice(1)}
             </Button>
           )}
         </CardContent>

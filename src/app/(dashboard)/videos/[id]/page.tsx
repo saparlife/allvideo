@@ -100,7 +100,7 @@ export default async function VideoDetailPage({ params }: Props) {
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" asChild className="text-gray-600 hover:text-gray-900 hover:bg-gray-100">
-          <Link href="/videos">
+          <Link href="/media">
             <ArrowLeft className="h-5 w-5" />
           </Link>
         </Button>

@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { verifyApiKey, apiError, apiSuccess } from "@/lib/api/auth";
 import { createAdminClient } from "@/lib/supabase/server";
-import { r2Client, R2_BUCKET, R2_PUBLIC_URL } from "@/lib/r2/client";
+import { r2Client, R2_BUCKET, R2_PUBLIC_URL, fixVariantUrls } from "@/lib/r2/client";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { processImage, getImageMetadata, parseVariants, DEFAULT_VARIANTS } from "@/lib/processing/image";
@@ -290,7 +290,7 @@ export async function GET(request: NextRequest) {
       resolution: img.width && img.height ? `${img.width}x${img.height}` : null,
       size: img.original_size_bytes,
       metadata: img.custom_metadata || {},
-      variants: (img.custom_metadata as { variants?: Record<string, unknown> })?.variants || {},
+      variants: fixVariantUrls((img.custom_metadata as { variants?: Record<string, { url: string }> })?.variants),
       originalUrl: img.original_key ? `${R2_PUBLIC_URL}/${img.original_key}` : null,
       createdAt: img.created_at,
     }));

@@ -8,9 +8,9 @@ const plans = [
   {
     name: "Free",
     price: "$0",
-    storage: "10 GB",
+    storage: "1 GB",
     features: [
-      "10 GB storage",
+      "1 GB storage",
       "Unlimited bandwidth",
       "1080p transcoding",
       "HLS adaptive streaming",
@@ -89,7 +89,7 @@ const plans = [
 const faqs = [
   {
     q: "What's included in the free plan?",
-    a: "The free plan includes 10GB storage, unlimited bandwidth, 1080p transcoding, and global CDN delivery. No credit card required. Perfect for trying the service or small projects."
+    a: "The free plan includes 1GB storage, unlimited bandwidth, 1080p transcoding, and global CDN delivery. No credit card required. Perfect for trying the service or small projects."
   },
   {
     q: "Is bandwidth really unlimited?",
@@ -219,7 +219,7 @@ export default function PricingPage() {
                 >
                   <Link href={
                     plan.name === "Enterprise"
-                      ? "mailto:hello@1stream.dev"
+                      ? "mailto:hello@1app.to"
                       : plan.name === "Free"
                         ? "/register"
                         : `/checkout?plan=${plan.name.toLowerCase()}`
@@ -251,7 +251,7 @@ export default function PricingPage() {
             Need a custom plan or have questions?
           </p>
           <Button asChild className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium">
-            <a href="mailto:hello@1stream.dev">Contact Sales</a>
+            <a href="mailto:hello@1app.to">Contact Sales</a>
           </Button>
         </div>
       </main>
@@ -270,12 +270,12 @@ export default function PricingPage() {
               <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
                 Home
               </Link>
-              <a href="mailto:hello@1stream.dev" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+              <a href="mailto:hello@1app.to" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
                 Contact
               </a>
             </div>
             <p className="text-sm text-gray-500">
-              &copy; {new Date().getFullYear()} 1stream.dev
+              &copy; {new Date().getFullYear()} stream.1app.to
             </p>
           </div>
         </div>

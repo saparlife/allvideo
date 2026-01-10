@@ -1,7 +1,7 @@
 {
   "name": "onestream-worker",
   "version": "1.0.0",
-  "description": "Media processing worker for 1stream.dev",
+  "description": "Media processing worker for stream.1app.to",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",

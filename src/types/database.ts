@@ -252,6 +252,85 @@ export interface Database {
           created_at?: string;
         };
       };
+      webhooks: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          url: string;
+          secret: string;
+          events: string[];
+          is_active: boolean;
+          last_triggered_at: string | null;
+          failure_count: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          url: string;
+          secret: string;
+          events?: string[];
+          is_active?: boolean;
+          last_triggered_at?: string | null;
+          failure_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          url?: string;
+          secret?: string;
+          events?: string[];
+          is_active?: boolean;
+          last_triggered_at?: string | null;
+          failure_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      webhook_deliveries: {
+        Row: {
+          id: string;
+          webhook_id: string;
+          event_type: string;
+          payload: Json;
+          response_status: number | null;
+          response_body: string | null;
+          duration_ms: number | null;
+          success: boolean;
+          attempt: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          webhook_id: string;
+          event_type: string;
+          payload: Json;
+          response_status?: number | null;
+          response_body?: string | null;
+          duration_ms?: number | null;
+          success?: boolean;
+          attempt?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          webhook_id?: string;
+          event_type?: string;
+          payload?: Json;
+          response_status?: number | null;
+          response_body?: string | null;
+          duration_ms?: number | null;
+          success?: boolean;
+          attempt?: number;
+          created_at?: string;
+        };
+      };
     };
     Views: {};
     Functions: {};
@@ -270,3 +349,13 @@ export type Video = Database["public"]["Tables"]["videos"]["Row"];
 export type Subscription = Database["public"]["Tables"]["subscriptions"]["Row"];
 export type TranscodeJob = Database["public"]["Tables"]["transcode_jobs"]["Row"];
 export type ApiKey = Database["public"]["Tables"]["api_keys"]["Row"];
+export type Webhook = Database["public"]["Tables"]["webhooks"]["Row"];
+export type WebhookDelivery = Database["public"]["Tables"]["webhook_deliveries"]["Row"];
+
+// Webhook event types
+export type WebhookEventType =
+  | "media.uploaded"
+  | "media.processing"
+  | "media.ready"
+  | "media.failed"
+  | "media.deleted";

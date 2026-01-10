@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { HardDrive, Wifi, Video, Upload, Plus, Loader2 } from "lucide-react";
+import { HardDrive, Wifi, FolderOpen, Upload, Plus, Loader2, Video, Image, Music, FileText } from "lucide-react";
 import Link from "next/link";
 import type { User } from "@/types/database";
 
@@ -17,9 +17,22 @@ function formatBytes(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
+interface MediaStats {
+  total: number;
+  ready: number;
+  processing: number;
+  videos: number;
+  images: number;
+  audio: number;
+  files: number;
+}
+
 export default function DashboardPage() {
   const [profile, setProfile] = useState<User | null>(null);
-  const [stats, setStats] = useState({ total: 0, ready: 0, processing: 0 });
+  const [stats, setStats] = useState<MediaStats>({
+    total: 0, ready: 0, processing: 0,
+    videos: 0, images: 0, audio: 0, files: 0
+  });
   const [loading, setLoading] = useState(true);
 
   const supabase = createClient();
@@ -38,17 +51,25 @@ export default function DashboardPage() {
 
       if (profileData) setProfile(profileData as User);
 
-      // Fetch video counts in parallel
-      const [totalRes, readyRes, processingRes] = await Promise.all([
-        supabase.from("videos").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+      // Fetch media counts
+      const [totalRes, readyRes, processingRes, videosRes, imagesRes, audioRes, filesRes] = await Promise.all([
+        supabase.from("videos").select("*", { count: "exact", head: true }).eq("user_id", user.id).neq("status", "deleted"),
         supabase.from("videos").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("status", "ready"),
         supabase.from("videos").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("status", "processing"),
+        supabase.from("videos").select("*", { count: "exact", head: true }).eq("user_id", user.id).or("media_type.eq.video,media_type.is.null"),
+        supabase.from("videos").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("media_type", "image"),
+        supabase.from("videos").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("media_type", "audio"),
+        supabase.from("videos").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("media_type", "file"),
       ]);
 
       setStats({
         total: totalRes.count || 0,
         ready: readyRes.count || 0,
         processing: processingRes.count || 0,
+        videos: videosRes.count || 0,
+        images: imagesRes.count || 0,
+        audio: audioRes.count || 0,
+        files: filesRes.count || 0,
       });
       setLoading(false);
     }
@@ -83,9 +104,9 @@ export default function DashboardPage() {
           </p>
         </div>
         <Button asChild className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white">
-          <Link href="/videos/upload">
+          <Link href="/media/upload">
             <Plus className="mr-2 h-4 w-4" />
-            Upload Video
+            Upload Media
           </Link>
         </Button>
       </div>
@@ -130,13 +151,13 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Total Videos */}
+        {/* Total Media */}
         <Card className="bg-white border-gray-200">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-500">
-              Total Videos
+              Total Media
             </CardTitle>
-            <Video className="h-4 w-4 text-gray-400" />
+            <FolderOpen className="h-4 w-4 text-gray-400" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-900">
@@ -158,41 +179,101 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <Button asChild variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50">
-              <Link href="/videos/upload">
+              <Link href="/media/upload">
                 <Upload className="mr-2 h-4 w-4" />
-                Upload New Video
+                Upload Media
               </Link>
             </Button>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Videos */}
+      {/* Media by Type */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card className="bg-white border-gray-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Video className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-gray-900">{stats.videos}</p>
+                <p className="text-sm text-gray-500">Videos</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-white border-gray-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Image className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-gray-900">{stats.images}</p>
+                <p className="text-sm text-gray-500">Images</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-white border-gray-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <Music className="h-5 w-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-gray-900">{stats.audio}</p>
+                <p className="text-sm text-gray-500">Audio</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-white border-gray-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <FileText className="h-5 w-5 text-orange-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-gray-900">{stats.files}</p>
+                <p className="text-sm text-gray-500">Files</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Media */}
       <Card className="bg-white border-gray-200">
         <CardHeader>
-          <CardTitle className="text-gray-900">Recent Videos</CardTitle>
+          <CardTitle className="text-gray-900">Recent Media</CardTitle>
         </CardHeader>
         <CardContent>
           {stats.total === 0 ? (
             <div className="text-center py-12">
-              <Video className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+              <FolderOpen className="h-12 w-12 mx-auto text-gray-300 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No videos yet
+                No media yet
               </h3>
               <p className="text-gray-500 mb-4">
-                Upload your first video to get started
+                Upload your first file to get started
               </p>
               <Button asChild className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white">
-                <Link href="/videos/upload">
+                <Link href="/media/upload">
                   <Plus className="mr-2 h-4 w-4" />
-                  Upload Video
+                  Upload Media
                 </Link>
               </Button>
             </div>
           ) : (
-            <p className="text-gray-500">
-              Your recent videos will appear here
-            </p>
+            <div className="text-center py-8">
+              <Button asChild variant="outline">
+                <Link href="/media">
+                  View All Media
+                </Link>
+              </Button>
+            </div>
           )}
         </CardContent>
       </Card>

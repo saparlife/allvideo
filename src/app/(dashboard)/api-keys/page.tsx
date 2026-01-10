@@ -22,8 +22,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Copy, Trash2, Key, Loader2, Check } from "lucide-react";
+import { Plus, Copy, Trash2, Key, Loader2, Check, BookOpen, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
+import { CodeBlock } from "@/components/ui/code-block";
 
 interface ApiKey {
   id: string;
@@ -104,7 +106,7 @@ export default function ApiKeysPage() {
           name: newKeyName,
           key_prefix: keyPrefix,
           key_hash: keyHash,
-          permissions: { read: true, write: true, delete: false },
+          permissions: { read: true, write: true, delete: true },
         });
 
       if (error) {
@@ -123,7 +125,7 @@ export default function ApiKeysPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this API key?")) return;
+    if (!confirm("Delete this API key?")) return;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any)
@@ -140,13 +142,11 @@ export default function ApiKeysPage() {
     toast.success("API key deleted");
   };
 
-  const handleCopy = () => {
-    if (newKey) {
-      navigator.clipboard.writeText(newKey);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-      toast.success("Copied to clipboard");
-    }
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast.success("Copied to clipboard");
   };
 
   const closeDialog = () => {
@@ -157,71 +157,51 @@ export default function ApiKeysPage() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">API Keys</h1>
-          <p className="text-gray-500">Manage API keys for external integrations</p>
+          <p className="text-gray-500">Manage your API keys for authentication</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white">
+            <Button className="bg-gray-900 hover:bg-gray-800 text-white">
               <Plus className="mr-2 h-4 w-4" />
               Create API Key
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-white border-gray-200">
+          <DialogContent className="bg-white">
             <DialogHeader>
-              <DialogTitle className="text-gray-900">
-                {newKey ? "API Key Created" : "Create API Key"}
-              </DialogTitle>
+              <DialogTitle>{newKey ? "API Key Created" : "Create API Key"}</DialogTitle>
             </DialogHeader>
-
             {newKey ? (
               <div className="space-y-4">
-                <p className="text-sm text-gray-500">
-                  Copy your API key now. You won&apos;t be able to see it again!
-                </p>
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  <p className="text-sm text-amber-800 font-medium">Save your API key now!</p>
+                  <p className="text-xs text-amber-600">You won't be able to see it again.</p>
+                </div>
                 <div className="flex gap-2">
-                  <Input
-                    value={newKey}
-                    readOnly
-                    className="bg-gray-100 border-gray-300 text-gray-900 font-mono text-sm"
-                  />
-                  <Button variant="outline" size="icon" onClick={handleCopy} className="border-gray-300">
-                    {copied ? (
-                      <Check className="h-4 w-4 text-emerald-500" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
+                  <Input value={newKey} readOnly className="font-mono text-sm bg-gray-50" />
+                  <Button variant="outline" size="icon" onClick={() => handleCopy(newKey)}>
+                    {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
-                <Button onClick={closeDialog} className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white">
-                  Done
-                </Button>
+                <Button onClick={closeDialog} className="w-full">Done</Button>
               </div>
             ) : (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="keyName" className="text-gray-700">
-                    Key Name
-                  </Label>
+                  <Label htmlFor="keyName">Key Name</Label>
                   <Input
                     id="keyName"
-                    placeholder="e.g., Production, 1study Integration"
+                    placeholder="e.g., Production, My App"
                     value={newKeyName}
                     onChange={(e) => setNewKeyName(e.target.value)}
-                    className="bg-white border-gray-300 text-gray-900"
                   />
                 </div>
-                <Button onClick={handleCreate} disabled={creating} className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white">
-                  {creating ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    "Create Key"
-                  )}
+                <Button onClick={handleCreate} disabled={creating} className="w-full">
+                  {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Create Key
                 </Button>
               </div>
             )}
@@ -229,59 +209,45 @@ export default function ApiKeysPage() {
         </Dialog>
       </div>
 
-      <Card className="bg-white border-gray-200">
+      {/* API Keys Table */}
+      <Card>
         <CardHeader>
-          <CardTitle className="text-gray-900">Your API Keys</CardTitle>
-          <CardDescription className="text-gray-500">
-            Use these keys to authenticate API requests from external applications
-          </CardDescription>
+          <CardTitle>Your API Keys</CardTitle>
+          <CardDescription>Use these keys to authenticate API requests</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="flex justify-center py-8">
-              <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+              <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
             </div>
           ) : keys.length > 0 ? (
             <Table>
               <TableHeader>
-                <TableRow className="border-gray-200">
-                  <TableHead className="text-gray-500">Name</TableHead>
-                  <TableHead className="text-gray-500">Key</TableHead>
-                  <TableHead className="text-gray-500">Status</TableHead>
-                  <TableHead className="text-gray-500">Last Used</TableHead>
-                  <TableHead className="text-gray-500">Created</TableHead>
-                  <TableHead className="text-gray-500 text-right">Actions</TableHead>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Key</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Last Used</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {keys.map((key) => (
-                  <TableRow key={key.id} className="border-gray-200">
-                    <TableCell className="font-medium text-gray-900">{key.name}</TableCell>
+                  <TableRow key={key.id}>
+                    <TableCell className="font-medium">{key.name}</TableCell>
                     <TableCell>
-                      <code className="text-gray-600 bg-gray-100 px-2 py-1 rounded text-sm">
-                        {key.key_prefix}...
-                      </code>
+                      <code className="bg-gray-100 px-2 py-1 rounded text-sm">{key.key_prefix}...</code>
                     </TableCell>
                     <TableCell>
-                      <Badge className={key.is_active ? "bg-emerald-500" : "bg-red-500"}>
+                      <Badge className={key.is_active ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}>
                         {key.is_active ? "Active" : "Inactive"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-gray-500">
-                      {key.last_used_at
-                        ? new Date(key.last_used_at).toLocaleDateString()
-                        : "Never"}
-                    </TableCell>
-                    <TableCell className="text-gray-500">
-                      {new Date(key.created_at).toLocaleDateString()}
+                      {key.last_used_at ? new Date(key.last_used_at).toLocaleDateString() : "Never"}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(key.id)}
-                        className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                      >
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(key.id)} className="text-red-500 hover:text-red-600">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </TableCell>
@@ -290,37 +256,44 @@ export default function ApiKeysPage() {
               </TableBody>
             </Table>
           ) : (
-            <div className="text-center py-12">
-              <Key className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No API keys yet</h3>
-              <p className="text-gray-500 mb-4">
-                Create an API key to integrate with external applications
-              </p>
+            <div className="text-center py-8">
+              <Key className="h-10 w-10 mx-auto text-gray-300 mb-3" />
+              <p className="text-gray-500">No API keys yet. Create one to get started.</p>
             </div>
           )}
         </CardContent>
       </Card>
 
-      <Card className="bg-white border-gray-200">
+      {/* Quick Start */}
+      <Card>
         <CardHeader>
-          <CardTitle className="text-gray-900">API Usage</CardTitle>
+          <CardTitle>Quick Start</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Get Video HLS URL</h4>
-            <pre className="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-x-auto">
-{`curl -X GET "https://api.1stream.dev/v1/videos/{videoId}" \\
-  -H "X-API-Key: 1s_live_xxxxx"`}
-            </pre>
-          </div>
-          <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Upload Video</h4>
-            <pre className="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-x-auto">
-{`curl -X POST "https://api.1stream.dev/v1/videos" \\
-  -H "X-API-Key: 1s_live_xxxxx" \\
-  -H "Content-Type: application/json" \\
-  -d '{"title": "My Video", "filename": "video.mp4", "size": 10485760}'`}
-            </pre>
+          <p className="text-sm text-gray-600">
+            Include your API key in the <code className="bg-gray-100 px-1.5 py-0.5 rounded text-indigo-600">Authorization</code> header:
+          </p>
+          <CodeBlock code={`curl -X POST "https://stream.1app.to/api/v1/upload" \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -F "file=@video.mp4"`} />
+
+          {/* Link to Docs */}
+          <div className="pt-4 border-t border-gray-200">
+            <Link
+              href="/docs"
+              className="flex items-center justify-between p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-100 hover:from-indigo-100 hover:to-purple-100 transition-colors group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white rounded-lg shadow-sm">
+                  <BookOpen className="h-5 w-5 text-indigo-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">API Documentation</p>
+                  <p className="text-sm text-gray-500">Full API reference with examples</p>
+                </div>
+              </div>
+              <ArrowRight className="h-5 w-5 text-indigo-600 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </div>
         </CardContent>
       </Card>

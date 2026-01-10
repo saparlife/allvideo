@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { verifyApiKey, apiError, apiSuccess } from "@/lib/api/auth";
 import { createAdminClient } from "@/lib/supabase/server";
-import { r2Client, R2_BUCKET, R2_PUBLIC_URL } from "@/lib/r2/client";
+import { r2Client, R2_BUCKET, R2_PUBLIC_URL, fixVariantUrls } from "@/lib/r2/client";
 import { DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command, PutObjectCommand } from "@aws-sdk/client-s3";
 import { processImage, getImageMetadata, parseVariants } from "@/lib/processing/image";
 
@@ -45,7 +45,7 @@ export async function GET(
         height: image.height,
         size: image.original_size_bytes,
       },
-      variants: (image.custom_metadata as { variants?: Record<string, unknown> })?.variants || {},
+      variants: fixVariantUrls((image.custom_metadata as { variants?: Record<string, { url: string }> })?.variants),
       metadata: image.custom_metadata || {},
       createdAt: image.created_at,
       processedAt: image.processed_at,
