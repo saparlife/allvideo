@@ -43,7 +43,10 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/pricing") ||
     request.nextUrl.pathname.startsWith("/docs") ||
     request.nextUrl.pathname.startsWith("/embed") ||
-    request.nextUrl.pathname.startsWith("/api/public");
+    request.nextUrl.pathname.startsWith("/api/public") ||
+    request.nextUrl.pathname.startsWith("/api/health") ||
+    request.nextUrl.pathname.startsWith("/api/v1") ||
+    request.nextUrl.pathname.startsWith("/api/webhooks");
 
   // Redirect unauthenticated users to login
   if (!user && !isAuthPage && !isPublicPage) {
