@@ -52,8 +52,8 @@ const API_GROUPS: EndpointGroup[] = [
     "title": "Video Title",
     "status": "ready",
     "duration": 120,
-    "thumbnail": "https://cdn.lovsell.com/...",
-    "hls": "https://cdn.lovsell.com/.../master.m3u8",
+    "thumbnail": "https://cdn.1app.to/...",
+    "hls": "https://cdn.1app.to/.../master.m3u8",
     "embed": "https://video.lovsell.com/embed/uuid",
     "createdAt": "2024-01-01T00:00:00Z"
   }]
@@ -111,8 +111,8 @@ curl -X POST "https://video.lovsell.com/api/public/videos/abc123/complete" \\
   "title": "Video Title",
   "status": "ready",
   "duration": 120,
-  "thumbnail": "https://cdn.lovsell.com/...",
-  "hls": "https://cdn.lovsell.com/.../master.m3u8",
+  "thumbnail": "https://cdn.1app.to/...",
+  "hls": "https://cdn.1app.to/.../master.m3u8",
   "embed": "https://video.lovsell.com/embed/uuid",
   "createdAt": "2024-01-01T00:00:00Z"
 }`,

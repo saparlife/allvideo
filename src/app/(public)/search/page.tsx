@@ -5,7 +5,7 @@ import { VideoCard } from "@/components/public/video-card";
 import { SearchFilters } from "./search-filters";
 import type { Metadata } from "next";
 
-const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.lovsell.com";
+const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.1app.to";
 
 interface Props {
   searchParams: Promise<{

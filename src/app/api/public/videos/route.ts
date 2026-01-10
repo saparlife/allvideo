@@ -112,7 +112,7 @@ export async function GET(request: NextRequest) {
       return apiError("Failed to fetch videos", 500);
     }
 
-    const cdnUrl = process.env.R2_PUBLIC_URL || "https://cdn.lovsell.com";
+    const cdnUrl = (process.env.R2_PUBLIC_URL || "https://cdn.1app.to").trim();
 
     const formattedVideos = (videos || []).map((video: Record<string, unknown>) => ({
       id: video.id,

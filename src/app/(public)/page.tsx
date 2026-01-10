@@ -6,7 +6,7 @@ import { VideoCard } from "@/components/public/video-card";
 import { InfiniteVideoGrid } from "@/components/public/infinite-video-grid";
 import { HeroSection } from "@/components/public/hero-section";
 
-const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.lovsell.com";
+const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.1app.to";
 
 interface Video {
   id: string;

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "Watch short videos on UnlimVideo",
 };
 
-const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.lovsell.com";
+const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.1app.to";
 
 export default async function ShortsPage() {
   const supabase = await createClient();

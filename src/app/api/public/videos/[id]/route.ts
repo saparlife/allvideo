@@ -34,7 +34,7 @@ export async function GET(
       return apiError("Video not found", 404);
     }
 
-    const cdnUrl = process.env.R2_PUBLIC_URL || "https://cdn.lovsell.com";
+    const cdnUrl = (process.env.R2_PUBLIC_URL || "https://cdn.1app.to").trim();
 
     return Response.json({
       id: video.id,

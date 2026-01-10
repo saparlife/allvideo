@@ -8,7 +8,7 @@ import { Upload, Loader2, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 
-const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.lovsell.com";
+const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.1app.to";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://video.lovsell.com";
 
 interface Category {

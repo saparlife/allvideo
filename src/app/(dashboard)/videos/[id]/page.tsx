@@ -87,12 +87,14 @@ export default async function VideoDetailPage({ params }: Props) {
     estimatedWaitMinutes = queuePosition * 4;
   }
 
+  const r2Url = (process.env.R2_PUBLIC_URL || "").trim();
+
   const hlsUrl = video.hls_key
-    ? `${process.env.R2_PUBLIC_URL}/${video.hls_key}`
+    ? `${r2Url}/${video.hls_key}`
     : null;
 
   const thumbnailUrl = video.thumbnail_key
-    ? `${process.env.R2_PUBLIC_URL}/${video.thumbnail_key}`
+    ? `${r2Url}/${video.thumbnail_key}`
     : undefined;
 
   return (

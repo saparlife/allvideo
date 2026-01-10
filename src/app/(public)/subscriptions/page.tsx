@@ -6,7 +6,7 @@ import { VideoCard } from "@/components/public/video-card";
 import Link from "next/link";
 import type { Metadata } from "next";
 
-const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.lovsell.com";
+const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.1app.to";
 
 export const metadata: Metadata = {
   title: "Subscriptions",

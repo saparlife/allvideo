@@ -92,7 +92,7 @@ export default function FileDetailPage({ params }: Props) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const supabase = createClient();
-  const r2Url = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "";
+  const r2Url = (process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "").trim();
 
   useEffect(() => {
     async function loadFile() {

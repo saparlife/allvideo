@@ -9,8 +9,8 @@ export const r2Client = new S3Client({
   },
 });
 
-export const R2_BUCKET = process.env.R2_BUCKET!;
-export const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL!;
+export const R2_BUCKET = process.env.R2_BUCKET!.trim();
+export const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL!.trim();
 
 // Fix URLs that might have old CDN domains stored in database
 export function fixCdnUrl(url: string | null | undefined): string | null {

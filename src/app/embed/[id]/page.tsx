@@ -31,8 +31,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Video Not Found" };
   }
 
+  const r2Url = (process.env.R2_PUBLIC_URL || "").trim();
   const thumbnailUrl = video.thumbnail_key
-    ? `${process.env.R2_PUBLIC_URL}/${video.thumbnail_key}`
+    ? `${r2Url}/${video.thumbnail_key}`
     : undefined;
 
   return {
@@ -61,9 +62,10 @@ export default async function EmbedPage({ params, searchParams }: Props) {
     notFound();
   }
 
-  const hlsUrl = `${process.env.R2_PUBLIC_URL}/${video.hls_key}`;
+  const r2Url = (process.env.R2_PUBLIC_URL || "").trim();
+  const hlsUrl = `${r2Url}/${video.hls_key}`;
   const thumbnailUrl = video.thumbnail_key
-    ? `${process.env.R2_PUBLIC_URL}/${video.thumbnail_key}`
+    ? `${r2Url}/${video.thumbnail_key}`
     : undefined;
 
   // Decode watermark if provided (URL encoded)

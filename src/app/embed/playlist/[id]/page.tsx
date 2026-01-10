@@ -84,7 +84,7 @@ export default async function PlaylistEmbedPage({ params, searchParams }: Props)
     notFound();
   }
 
-  const CDN_URL = process.env.R2_PUBLIC_URL || "https://cdn.lovsell.com";
+  const CDN_URL = (process.env.R2_PUBLIC_URL || "https://cdn.1app.to").trim();
 
   // Prepare video data for player
   const playlistVideos = videos.map((v: any) => ({

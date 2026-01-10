@@ -9,7 +9,7 @@ import { VideoSort } from "@/components/public/video-sort";
 import { FeaturedVideo } from "./featured-video";
 import type { Metadata } from "next";
 
-const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.lovsell.com";
+const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.1app.to";
 
 interface Props {
   params: Promise<{ username: string }>;

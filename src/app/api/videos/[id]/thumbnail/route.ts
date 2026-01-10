@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { r2Client, R2_BUCKET } from "@/lib/r2/client";
 import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 
-const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.lovsell.com";
+const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.1app.to";
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 

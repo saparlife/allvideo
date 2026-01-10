@@ -51,7 +51,7 @@ export default async function ImageDetailPage({ params }: Props) {
     notFound();
   }
 
-  const r2Url = process.env.R2_PUBLIC_URL || "";
+  const r2Url = (process.env.R2_PUBLIC_URL || "").trim();
   const originalUrl = image.original_key ? `${r2Url}/${image.original_key}` : null;
 
   // Fix variant URLs - replace old CDN domain with current one

@@ -5,7 +5,7 @@ import { AnalyticsCharts } from "./analytics-charts";
 import { TimeRangeSelector } from "./time-range-selector";
 import type { Metadata } from "next";
 
-const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.lovsell.com";
+const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.1app.to";
 
 export const metadata: Metadata = {
   title: "Analytics - Creator Studio",

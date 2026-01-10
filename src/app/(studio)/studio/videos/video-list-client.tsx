@@ -6,7 +6,7 @@ import { Trash2, EyeOff, Lock, Globe, Loader2, CheckSquare, Square, Filter, Arro
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.lovsell.com";
+const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.1app.to";
 
 interface Video {
   id: string;
