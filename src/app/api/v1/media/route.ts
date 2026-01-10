@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let query = (supabase as any)
       .from("videos")
-      .select("id, title, status, media_type, duration_seconds, width, height, original_size_bytes, mime_type, views_count, custom_metadata, created_at, hls_key, thumbnail_key")
+      .select("id, title, status, media_type, duration_seconds, width, height, original_size_bytes, mime_type, views_count, custom_metadata, created_at, hls_key, thumbnail_key, original_key")
       .eq("user_id", auth.userId)
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
@@ -87,10 +87,12 @@ export async function GET(request: NextRequest) {
       created_at: string;
       hls_key: string | null;
       thumbnail_key: string | null;
+      original_key: string | null;
     }) => {
+      const mediaType = m.media_type || "video";
       const base = {
         id: m.id,
-        type: m.media_type || "video",
+        type: mediaType,
         title: m.title,
         status: m.status,
         size: m.original_size_bytes,
@@ -100,7 +102,7 @@ export async function GET(request: NextRequest) {
       };
 
       // Add type-specific fields
-      if (m.media_type === "video") {
+      if (mediaType === "video") {
         return {
           ...base,
           duration: m.duration_seconds,
@@ -111,8 +113,29 @@ export async function GET(request: NextRequest) {
         };
       }
 
-      // For other types (image, audio, file) - add relevant fields later
-      return base;
+      if (mediaType === "image") {
+        return {
+          ...base,
+          width: m.width,
+          height: m.height,
+          url: m.original_key ? `${R2_PUBLIC_URL}/${m.original_key}` : null,
+          thumbnailUrl: m.thumbnail_key ? `${R2_PUBLIC_URL}/${m.thumbnail_key}` : null,
+        };
+      }
+
+      if (mediaType === "audio") {
+        return {
+          ...base,
+          duration: m.duration_seconds,
+          url: m.original_key ? `${R2_PUBLIC_URL}/${m.original_key}` : null,
+        };
+      }
+
+      // File type
+      return {
+        ...base,
+        url: m.original_key ? `${R2_PUBLIC_URL}/${m.original_key}` : null,
+      };
     });
 
     return apiSuccess({
