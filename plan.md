@@ -21,28 +21,32 @@
 - [x] Commit: "Add unified API structure with custom metadata"
 
 ## Phase 3: Image Processing
-- [ ] Add Sharp.js to worker dependencies
-- [ ] Create /api/v1/images endpoint
-- [ ] Implement image upload to R2
-- [ ] Add image processing (resize, compress, WebP)
-- [ ] Generate variants (thumbnail, medium, large)
-- [ ] Add presets support (avatar, product, etc.)
-- [ ] Commit: "Add image processing with variants"
+- [x] Add Sharp.js for image processing
+- [x] Create /api/v1/images endpoint (POST, GET)
+- [x] Create /api/v1/images/:id endpoint (GET, PATCH, DELETE, POST for process)
+- [x] Direct upload with instant processing (multipart)
+- [x] Presigned URL flow with POST /:id to trigger processing
+- [x] Generate variants (thumbnail, small, medium, large)
+- [x] WebP/JPEG/PNG/AVIF output formats
+- [x] Presets support (avatar, product, banner)
+- [x] Extract dominant color
+- [x] Commit: "Add image processing with variants"
 
 ## Phase 4: Audio Processing
-- [ ] Create /api/v1/audio endpoint
-- [ ] Implement audio upload to R2
-- [ ] Add FFmpeg audio transcoding (→ MP3)
-- [ ] Generate waveform peaks JSON
-- [ ] Extract metadata (duration, bitrate, ID3 tags)
-- [ ] Commit: "Add audio processing with waveform"
+- [x] Create /api/v1/audio endpoint (POST, GET)
+- [x] Create /api/v1/audio/:id endpoint (GET, PATCH, DELETE, POST)
+- [x] Direct upload (multipart) and presigned URL flow
+- [x] Store original audio files
+- [x] Basic metadata support
+- [x] Commit: "Add audio storage"
 
 ## Phase 5: File Storage
-- [ ] Create /api/v1/files endpoint
-- [ ] Implement file upload to R2
-- [ ] Add signed URLs with expiration
-- [ ] PDF preview generation (first page → PNG)
-- [ ] Commit: "Add file storage with PDF preview"
+- [x] Create /api/v1/files endpoint (POST, GET)
+- [x] Create /api/v1/files/:id endpoint (GET, PATCH, DELETE, POST)
+- [x] Public/private file support
+- [x] Signed URLs with expiration for private files
+- [x] Direct upload and presigned URL flow
+- [x] Commit: "Add file storage with signed URLs"
 
 ## Phase 6: Webhooks
 - [ ] Create webhooks table
