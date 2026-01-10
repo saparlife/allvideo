@@ -705,11 +705,11 @@ curl "https://stream.1app.to/api/v1/files/file_abc123?download=true&expires=3600
           {activeSection === "media" && (
             <Card>
               <CardHeader>
-                <CardTitle>Media List</CardTitle>
+                <CardTitle>Media (Unified)</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-600 mb-4">
-                  List and filter all your media across types. Query by custom metadata fields.
+                  Unified endpoints for managing all media types. Use these for generic media operations without knowing the type.
                 </p>
                 <Accordion type="multiple" className="w-full">
                   <Endpoint
