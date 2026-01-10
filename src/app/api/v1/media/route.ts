@@ -4,6 +4,21 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { R2_PUBLIC_URL } from "@/lib/r2/client";
 
 /**
+ * Build a proper URL from R2 key, encoding special characters
+ */
+function buildMediaUrl(key: string | null): string | null {
+  if (!key) return null;
+  // Clean the key - remove any newlines or control characters
+  const cleanKey = key.replace(/[\r\n\x00-\x1f]/g, "").trim();
+  // Encode each path segment separately to handle spaces and special chars
+  const encodedPath = cleanKey
+    .split("/")
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+  return `${R2_PUBLIC_URL}/${encodedPath}`;
+}
+
+/**
  * GET /api/v1/media
  * List all media (videos, images, audio, files) with filtering
  *
@@ -108,8 +123,8 @@ export async function GET(request: NextRequest) {
           duration: m.duration_seconds,
           resolution: m.width && m.height ? `${m.width}x${m.height}` : null,
           views: m.views_count,
-          hlsUrl: m.hls_key ? `${R2_PUBLIC_URL}/${m.hls_key}` : null,
-          thumbnailUrl: m.thumbnail_key ? `${R2_PUBLIC_URL}/${m.thumbnail_key}` : null,
+          hlsUrl: buildMediaUrl(m.hls_key),
+          thumbnailUrl: buildMediaUrl(m.thumbnail_key),
         };
       }
 
@@ -118,8 +133,8 @@ export async function GET(request: NextRequest) {
           ...base,
           width: m.width,
           height: m.height,
-          url: m.original_key ? `${R2_PUBLIC_URL}/${m.original_key}` : null,
-          thumbnailUrl: m.thumbnail_key ? `${R2_PUBLIC_URL}/${m.thumbnail_key}` : null,
+          url: buildMediaUrl(m.original_key),
+          thumbnailUrl: buildMediaUrl(m.thumbnail_key),
         };
       }
 
@@ -127,14 +142,14 @@ export async function GET(request: NextRequest) {
         return {
           ...base,
           duration: m.duration_seconds,
-          url: m.original_key ? `${R2_PUBLIC_URL}/${m.original_key}` : null,
+          url: buildMediaUrl(m.original_key),
         };
       }
 
       // File type
       return {
         ...base,
-        url: m.original_key ? `${R2_PUBLIC_URL}/${m.original_key}` : null,
+        url: buildMediaUrl(m.original_key),
       };
     });
 

@@ -5,6 +5,21 @@ import { r2Client, R2_BUCKET, R2_PUBLIC_URL, fixVariantUrls } from "@/lib/r2/cli
 import { DeleteObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 
 /**
+ * Build a proper URL from R2 key, encoding special characters
+ */
+function buildMediaUrl(key: string | null): string | null {
+  if (!key) return null;
+  // Clean the key - remove any newlines or control characters
+  const cleanKey = key.replace(/[\r\n\x00-\x1f]/g, "").trim();
+  // Encode each path segment separately to handle spaces and special chars
+  const encodedPath = cleanKey
+    .split("/")
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+  return `${R2_PUBLIC_URL}/${encodedPath}`;
+}
+
+/**
  * GET /api/v1/media/:id
  * Get any media item by ID (video, image, audio, file)
  */
@@ -58,8 +73,8 @@ export async function GET(
         duration: media.duration_seconds,
         resolution: media.width && media.height ? `${media.width}x${media.height}` : null,
         views: media.views_count,
-        hlsUrl: media.hls_key ? `${R2_PUBLIC_URL}/${media.hls_key}` : null,
-        thumbnailUrl: media.thumbnail_key ? `${R2_PUBLIC_URL}/${media.thumbnail_key}` : null,
+        hlsUrl: buildMediaUrl(media.hls_key),
+        thumbnailUrl: buildMediaUrl(media.thumbnail_key),
       });
     }
 
@@ -68,7 +83,7 @@ export async function GET(
         ...base,
         width: media.width,
         height: media.height,
-        url: media.original_key ? `${R2_PUBLIC_URL}/${media.original_key}` : null,
+        url: buildMediaUrl(media.original_key),
         variants: fixVariantUrls((media.custom_metadata as { variants?: Record<string, { url: string }> })?.variants),
       });
     }
@@ -77,14 +92,14 @@ export async function GET(
       return apiSuccess({
         ...base,
         duration: media.duration_seconds,
-        url: media.original_key ? `${R2_PUBLIC_URL}/${media.original_key}` : null,
+        url: buildMediaUrl(media.original_key),
       });
     }
 
     // File type
     return apiSuccess({
       ...base,
-      url: media.original_key ? `${R2_PUBLIC_URL}/${media.original_key}` : null,
+      url: buildMediaUrl(media.original_key),
     });
   } catch (error) {
     console.error("Media GET error:", error);
