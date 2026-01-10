@@ -2,6 +2,8 @@
  * File validation utilities
  */
 
+import { transliterate } from "transliteration";
+
 // Max file sizes by subscription tier (in bytes)
 export const MAX_FILE_SIZES = {
   free: 500 * 1024 * 1024,      // 500 MB
@@ -18,6 +20,7 @@ export type SubscriptionTier = keyof typeof MAX_FILE_SIZES;
 
 /**
  * Sanitize filename to prevent security issues
+ * - Transliterates non-Latin characters to ASCII
  * - Removes path traversal attempts (../)
  * - Removes null bytes
  * - Replaces dangerous characters
@@ -26,7 +29,14 @@ export type SubscriptionTier = keyof typeof MAX_FILE_SIZES;
 export function sanitizeFilename(filename: string): string {
   if (!filename) return "unnamed";
 
-  let sanitized = filename
+  // Extract extension first
+  const ext = getExtension(filename);
+  const nameWithoutExt = ext
+    ? filename.slice(0, filename.length - ext.length - 1)
+    : filename;
+
+  // Transliterate non-Latin characters to ASCII (Russian, Kazakh, Greek, etc.)
+  let sanitized = transliterate(nameWithoutExt)
     // Remove null bytes
     .replace(/\0/g, "")
     // Remove path traversal
@@ -36,23 +46,33 @@ export function sanitizeFilename(filename: string): string {
     .replace(/^[\s.]+|[\s.]+$/g, "")
     // Replace path separators
     .replace(/[/\\]/g, "_")
-    // Remove control characters
-    .replace(/[\x00-\x1f\x7f]/g, "")
+    // Remove control characters and newlines
+    .replace(/[\x00-\x1f\x7f\r\n]/g, "")
     // Replace potentially dangerous characters
     .replace(/[<>:"|?*]/g, "_")
-    // Collapse multiple underscores
-    .replace(/_+/g, "_");
+    // Replace spaces with hyphens for cleaner URLs
+    .replace(/\s+/g, "-")
+    // Collapse multiple underscores/hyphens
+    .replace(/[-_]+/g, "-")
+    // Remove leading/trailing hyphens
+    .replace(/^-+|-+$/g, "")
+    // Convert to lowercase for consistency
+    .toLowerCase();
+
+  // Add extension back
+  if (ext) {
+    sanitized = `${sanitized}.${ext}`;
+  }
 
   // Limit filename length (255 is common filesystem limit)
   if (sanitized.length > 200) {
-    const ext = getExtension(sanitized);
     const name = sanitized.slice(0, 200 - ext.length - 1);
     sanitized = ext ? `${name}.${ext}` : name;
   }
 
   // Fallback if empty after sanitization
-  if (!sanitized || sanitized === "_") {
-    return "unnamed";
+  if (!sanitized || sanitized === "-" || sanitized === `.${ext}`) {
+    return ext ? `unnamed.${ext}` : "unnamed";
   }
 
   return sanitized;
